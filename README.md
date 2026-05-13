@@ -24,8 +24,8 @@
 | Anna Luz Serena           | Líder / Desarrolladora Backend | [@annaluzserena](https://github.com/annaluzserena) | annaluzserena@protonmail.com           |
 | Rodrigo Solange A.  | Diseñador / Frontend         | [@SolangeRodrigo](https://github.com/SolangeRodrigo)   | solangeabigailrodrigo@gmail.com            |
 | Nardulli Ornela | Diseñador / Frontend | [@nardulli03](https://github.com/nardulli03) | ornenardulli@gmail.com            |
-| Gomez Gago Aaron  | Desarrollador Backend        | [@aarongomezgago](https://github.com/aarongomezgago)   | 
-| Facundo Nahuel Fernandes| Desarrollador Backend   | [@Facu067] https://github.com/Facu067 | facu067@gmail.com  |
+| Gomez Gago Aaron  | Desarrollador Backend  | [@aarongomezgago](https://github.com/aarongomezgago) |  arongomezgg@gmail.com |
+| Facundo Nahuel Fernandes| Desarrollador Backend   | [@Facu067](https://github.com/Facu067) | facu067@gmail.com  |
 
 aarongomezgg@gmail.com            |
 
