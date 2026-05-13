@@ -26,7 +26,7 @@
 | Nardulli Ornela | Diseñador / Frontend | [@nardulli03](https://github.com/nardulli03) | ornenardulli@gmail.com            |
 | Gomez Gago Aaron  | Desarrollador Backend  | [@aarongomezgago](https://github.com/aarongomezgago) | arongomezgg@gmail.com |
 | Facundo Nahuel Fernandes| Desarrollador Backend   | [@Facu067](https://github.com/Facu067) | facu067@gmail.com  |
-| Belén Aylen Marti       | Desarrollador Backend   | [@martibelen99] |martibelen99@gmail.com |
+| Belén Aylen Marti       | Desarrollador Backend   |  [@martibelen99](https://github.com/martibelen99) |martibelen99@gmail.com |
 
 ### Reglas básicas del equip
 
