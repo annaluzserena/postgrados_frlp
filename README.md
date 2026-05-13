@@ -25,7 +25,7 @@
 | Rodrigo Solange A.  | Diseñador / Frontend         | [@SolangeRodrigo](https://github.com/SolangeRodrigo)   | solangeabigailrodrigo@gmail.com            |
 | Nardulli Ornela | Diseñador / Frontend | [@nardulli03](https://github.com/nardulli03) | ornenardulli@gmail.com            |
 | Gomez Gago Aaron  | Desarrollador Backend        | [@aarongomezgago](https://github.com/aarongomezgago)   | aarongomezgg@gmail.com            |
-
+| Marti Belén Aylen          | Desarrollador Backend |[@martibelen99](https://github.com/martibelen99)      |
 ### Reglas básicas del equipo
 
 - **Commits**: Usa mensajes claros y en presente (ej: "Agrega login con GitHub"). Sigue la convención [Conventional Commits](https://www.conventionalcommits.org) si es posible.
