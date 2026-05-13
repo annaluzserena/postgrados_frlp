@@ -23,7 +23,7 @@
 |---------------------|------------------------------|---------------------------------|--------------------------------|
 | Tu Nombre           | Líder / Desarrollador Principal | [@tuusuario](https://github.com/tuusuario) | tuemail@ejemplo.com           |
 | Rodrigo Solange A.  | Diseñador / Frontend         | [@SolangeRodrigo](https://github.com/SolangeRodrigo)   | solangeabigailrodrigo@gmail.com            |
-| Nombre Compañero 2  | Diseñador / Frontend         | [@usuario3](https://github.com/usuario3)   | email3@ejemplo.com            |
+| Nardulli Ornela | Diseñador / Frontend | [@nardulli03] | ornenardulli@gmail.com            |
 | Nombre Compañero 3  | Desarrollador Backend        | [@usuario2](https://github.com/usuario2)   | email2@ejemplo.com            |
 
 ### Reglas básicas del equipo
