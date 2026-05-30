@@ -2,7 +2,8 @@
 
 **Estado:** [Propuesto ]  
 **Fecha:** 30/05/2026  
-**Autor:** [Serena Anna Luz ]
+**Autor:** [Belén Aylen Martí, Fernandes Facundo,  Gomez Gago Aaron, 
+            Nardulli Ornela, Serena Anna Luz, Rodrigo Solange Abigail]
 
 ---
 
@@ -47,9 +48,9 @@ Elegimos python porque es manejado de manera versatil por todo el grupo, y esto 
 - Desarrollo ágil en el backend con una sintaxis limpia y generación automática de la documentación de la API (Swagger).
 
 
-Reducción de errores en tiempo de ejecución gracias al fuerte tipado en ambos extremos (Pydantic en backend, TypeScript en frontend).
+- Reducción de errores en tiempo de ejecución gracias al fuerte tipado en ambos extremos (Pydantic en backend, TypeScript en frontend).
 
 ### Negativas (trade-offs)
 - Necesidad de establecer y documentar un flujo de trabajo claro para la gestión de dependencias y entornos virtuales en Python (por ejemplo, definir si usaremos poetry o venv + pip) para evitar problemas de compatibilidad en el equipo.
 
-Cambio de contexto mental constante (context switching) al tener que programar en dos lenguajes distintos (Python en el backend y TypeScript en el frontend).
+- Cambio de contexto mental constante (context switching) al tener que programar en dos lenguajes distintos (Python en el backend y TypeScript en el frontend).
