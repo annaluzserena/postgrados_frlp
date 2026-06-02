@@ -107,9 +107,9 @@ El servidor acepta y procesa todos los uploads sin retornar errores 500 o timeou
 
 ---
 
-## ASR adicionales del equipo
+## ASR adicionales del equipo 👩‍💻👨‍💻🤝
 
-## ASR-001: Control de acceso por enlace tokenizado para docentes
+## ASR-005: Control de acceso por enlace tokenizado para docentes
 
 **Módulo afectado:** Gestión Docente  
 **Atributo de calidad:** Seguridad  
@@ -132,7 +132,7 @@ Adulteración silenciosa de registros académicos sin trazabilidad, comprometien
 
 ---
 
-## ASR-002: Propagación atómica de asistencia y calificaciones al perfil del estudiante
+## ASR-006: Propagación atómica de asistencia y calificaciones al perfil del estudiante
 
 **Módulo afectado:** Gestión Docente  
 **Atributo de calidad:** Corrección  
@@ -155,7 +155,7 @@ Inconsistencia silenciosa entre lo registrado por el docente y lo visible en el 
 
 ---
 
-## ASR-003: Restricción de escritura sobre datos de tesis a la CPR
+## ASR-007: Restricción de escritura sobre datos de tesis a la CPR
 
 **Módulo afectado:** Seguimiento de Graduación  
 **Atributo de calidad:** Seguridad  
@@ -178,7 +178,7 @@ Alteración de información con valor institucional y legal, sin capacidad de de
 
 ---
 
-## ASR-004: Validación de plazos normativos por tipo de carrera
+## ASR-008: Validación de plazos normativos por tipo de carrera
 
 **Módulo afectado:** Seguimiento de Graduación  
 **Atributo de calidad:** Corrección  
@@ -201,7 +201,7 @@ Estudiantes en situación de ralentización que el sistema no detecta, con conse
 
 ---
 
-## ASR-005: Generación de reportes estadísticos sin impacto en la operación transaccional
+## ASR-009: Generación de reportes estadísticos sin impacto en la operación transaccional
 
 **Módulo afectado:** Analytics & Reporting  
 **Atributo de calidad:** Rendimiento  
@@ -224,7 +224,7 @@ Degradación del sistema en momentos de uso intensivo, con posible pérdida de d
 
 ---
 
-## ASR-006: Integridad y completitud de los datos exportados en PDF y Excel
+## ASR-010: Integridad y completitud de los datos exportados en PDF y Excel
 
 **Módulo afectado:** Analytics & Reporting  
 **Atributo de calidad:** Corrección  
