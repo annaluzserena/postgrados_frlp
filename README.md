@@ -24,9 +24,11 @@
 | Anna Luz Serena           | Líder / Desarrolladora Backend | [@annaluzserena](https://github.com/annaluzserena) | annaluzserena@protonmail.com           |
 | Rodrigo Solange A.  | Diseñador / Frontend         | [@SolangeRodrigo](https://github.com/SolangeRodrigo)   | solangeabigailrodrigo@gmail.com            |
 | Nardulli Ornela | Diseñador / Frontend | [@nardulli03](https://github.com/nardulli03) | ornenardulli@gmail.com            |
-| Nombre Compañero 3  | Desarrollador Backend        | [@usuario2](https://github.com/usuario2)   | email2@ejemplo.com            |
+| Gomez Gago Aaron  | Desarrollador Backend  | [@aarongomezgago](https://github.com/aarongomezgago) | aarongomezgg@gmail.com |
+| Facundo Nahuel Fernandes| Desarrollador Backend   | [@Facu067](https://github.com/Facu067) | facu067@gmail.com  |
+| Belén Aylen Marti       | Desarrollador Backend   |  [@martibelen99](https://github.com/martibelen99) |martibelen99@gmail.com |
 
-### Reglas básicas del equipo
+### Reglas básicas del equip
 
 - **Commits**: Usa mensajes claros y en presente (ej: "Agrega login con GitHub"). Sigue la convención [Conventional Commits](https://www.conventionalcommits.org) si es posible.
 - **Branching**: Nunca pushes directos a `main`. Crea una rama con tu nombre o tarea (`feature/nombre-tarea` o `bugfix/...`).
