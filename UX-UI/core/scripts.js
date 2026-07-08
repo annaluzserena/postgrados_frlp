@@ -9,6 +9,84 @@ const NOTIFICATIONS = [
   { id:8, type:'danger',  icon:'🚨', msg:'<strong>Nicolás Benítez</strong> bloqueado: falta DNI y cert. analítico.', time:'Ayer 17:30', read:true },
 ];
 
+// ===== DATOS ALUMNOS LEGAJO =====
+// Cada entrada tiene todos los campos que se muestran en el panel derecho del legajo.
+// "docs" define qué documentos están presentes (true) o ausentes (false).
+const ALUMNOS_LEGAJO = {
+  '2025-0041': {
+    dni: '38.451.902',
+    nacimiento: '14/03/1999',
+    email: 'm.rodriguez@mail.com',
+    telefono: '+54 9 221 555-0172',
+    inscripcion: '03/02/2026',
+    docs: { dni: true, analitico: true, partida: true, foto: true, ddjj: true }
+  },
+  '2025-0042': {
+    dni: '28.999.111',
+    nacimiento: '22/07/1987',
+    email: 'c.lopez@mail.com',
+    telefono: '+54 9 221 555-0284',
+    inscripcion: '05/02/2026',
+    docs: { dni: true, analitico: true, partida: false, foto: true, ddjj: false }
+  },
+  '2025-0043': {
+    dni: '31.222.333',
+    nacimiento: '09/11/1993',
+    email: 'a.villalba@mail.com',
+    telefono: '+54 9 221 555-0391',
+    inscripcion: '06/02/2026',
+    docs: { dni: true, analitico: true, partida: true, foto: true, ddjj: false }
+  },
+  '2025-0044': {
+    dni: '33.444.555',
+    nacimiento: '30/04/1995',
+    email: 'j.perez@mail.com',
+    telefono: '+54 9 221 555-0447',
+    inscripcion: '07/02/2026',
+    docs: { dni: false, analitico: true, partida: true, foto: true, ddjj: true }
+  },
+  '2025-0045': {
+    dni: '27.777.888',
+    nacimiento: '18/06/1983',
+    email: 'l.gonzalez@mail.com',
+    telefono: '+54 9 221 555-0553',
+    inscripcion: '03/02/2026',
+    docs: { dni: true, analitico: true, partida: true, foto: true, ddjj: true }
+  },
+  '2026-0001': {
+    dni: '40.123.456',
+    nacimiento: '25/01/2002',
+    email: 'm.torres@mail.com',
+    telefono: '+54 9 221 555-0612',
+    inscripcion: '10/02/2026',
+    docs: { dni: true, analitico: true, partida: false, foto: true, ddjj: false }
+  },
+  '2026-0002': {
+    dni: '39.221.777',
+    nacimiento: '14/09/2001',
+    email: 'f.garcia@mail.com',
+    telefono: '+54 9 221 555-0724',
+    inscripcion: '11/02/2026',
+    docs: { dni: true, analitico: false, partida: true, foto: false, ddjj: true }
+  },
+  '2025-0046': {
+    dni: '36.554.321',
+    nacimiento: '03/12/1997',
+    email: 's.ramirez@mail.com',
+    telefono: '+54 9 221 555-0836',
+    inscripcion: '04/02/2026',
+    docs: { dni: true, analitico: true, partida: true, foto: true, ddjj: true }
+  },
+  '2026-0003': {
+    dni: '40.777.123',
+    nacimiento: '20/05/2001',
+    email: 'c.bravo@mail.com',
+    telefono: '+54 9 221 555-0945',
+    inscripcion: '09/02/2026',
+    docs: { dni: true, analitico: true, partida: true, foto: true, ddjj: true }
+  },
+};
+
 function renderNotifList(listEl, items) {
   listEl.innerHTML = '';
   items.forEach(n => {
@@ -169,15 +247,51 @@ function showToast(msg) {
 }
 
 // ===== LEGAJO =====
+// Construye los chips de documentos según qué docs tiene el alumno
+function buildDocChips(docs) {
+  const labels = {
+    dni:      'DNI',
+    analitico:'Cert. analítico',
+    partida:  'Partida de nacimiento',
+    foto:     'Foto 4×4',
+    ddjj:     'Declaración jurada',
+  };
+  return Object.entries(labels).map(([key, label]) => {
+    const ok = docs[key];
+    return `<span class="chip ${ok ? 'green' : 'red'}">${label} ${ok ? '✓' : '✗'}</span>`;
+  }).join('');
+}
+
 function selectLegajo(el, initials, name, carrera, id, cohorte, estado) {
   document.querySelectorAll('.legajo-item').forEach(i => i.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('legajo-avatar').textContent = initials;
-  document.getElementById('legajo-name').textContent = name;
-  document.getElementById('legajo-id').textContent = 'Legajo #' + id;
+
+  // Campos básicos
+  document.getElementById('legajo-avatar').textContent  = initials;
+  document.getElementById('legajo-name').textContent    = name;
+  document.getElementById('legajo-id').textContent      = 'Legajo #' + id;
   document.getElementById('legajo-carrera').textContent = carrera;
   document.getElementById('legajo-cohorte').textContent = cohorte;
-  document.getElementById('legajo-estado').textContent = estado;
+  document.getElementById('legajo-estado').textContent  = estado;
+
+  // Campos dinámicos desde ALUMNOS_LEGAJO
+  const alumno = ALUMNOS_LEGAJO[id];
+  if (alumno) {
+    document.getElementById('legajo-dni').textContent        = alumno.dni;
+    document.getElementById('legajo-nacimiento').textContent = alumno.nacimiento;
+    document.getElementById('legajo-email').textContent      = alumno.email;
+    document.getElementById('legajo-telefono').textContent   = alumno.telefono;
+    document.getElementById('legajo-inscripcion').textContent= alumno.inscripcion;
+    document.getElementById('legajo-doc-chips').innerHTML    = buildDocChips(alumno.docs);
+  } else {
+    // Fallback si el alumno no está en el objeto de datos
+    document.getElementById('legajo-dni').textContent        = '—';
+    document.getElementById('legajo-nacimiento').textContent = '—';
+    document.getElementById('legajo-email').textContent      = '—';
+    document.getElementById('legajo-telefono').textContent   = '—';
+    document.getElementById('legajo-inscripcion').textContent= '—';
+    document.getElementById('legajo-doc-chips').innerHTML    = '';
+  }
 }
 
 // ===== THEME =====

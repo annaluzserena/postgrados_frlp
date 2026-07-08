@@ -1,5 +1,5 @@
-/* ===== PALETA UTN FRLP ===== */
-:root {
+
+  :root {
   --bg: #F2F4F7;
   --surface: #FFFFFF;
   --surface2: #EFF1F5;
@@ -68,6 +68,30 @@ body.dark {
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.5; min-height: 100vh; }
+
+/* ===== MARCA DE AGUA (UTN WATERMARK) ===== */
+.sidebar-watermark {
+  padding: 20px 20px 0px;
+  opacity: 0.50s;
+  pointer-events: none;
+  transition: opacity 0.s ease;
+}
+
+.sidebar-watermark img {
+  width: 100%;
+  max-width: 120px;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Efecto para que resalte y se vuelva blanca en modo oscuro */
+body.dark .sidebar-watermark {
+  opacity: 0.16; /* Le subimos un poquito la opacidad sobre el fondo negro */
+}
+
+body.dark .sidebar-watermark img {
+  filter: invert(1) brightness(2); /* Invierte el color del SVG a blanco */
+}
 
 /* ===== LAYOUT ===== */
 .shell { display: flex; height: 100vh; overflow: hidden; }
