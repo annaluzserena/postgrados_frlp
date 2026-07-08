@@ -20,6 +20,22 @@ Cada entrada debe referenciar, cuando aplique: herramienta de diseño (Figma/Ado
 
 ---
 
+## [PATCH-1.0.1] - 2026-07-07
+
+### Added
+- Folleto presentado en la feria 
+- README de diseño UX-UI
+
+### Changed
+- Set de wireframes (low-fidelity) actualizado para módulo [CORE]
+- Funcionalidad de cerrar sesión y modo oscuro en el prototipo para módulo [CORE]
+
+**Responsable:** Grupo 01
+**Herramienta:** Figma para wireframes
+**Link al artefacto:** [Carpeta UX-UI](./)
+
+---
+
 ## [1.0.0] - 2026-06-30
 
 ### Added
