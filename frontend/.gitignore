@@ -26,3 +26,6 @@ dist-ssr
 # pnpm
 pnpm-lock.yaml
 pnpm-workspace.yaml
+
+# Variables de entorno locales
+.env
