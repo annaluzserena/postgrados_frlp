@@ -1,8 +1,12 @@
 import { http, HttpResponse, delay } from "msw";
 import { legajosFixture } from "./data/legajos";
-import type { CrearLegajoRequest, EstadoLegajo, Legajo } from "@/shared/types/legajo";
+import { cohortesFixture } from './data/cohortes';
+import { seminariosFixture } from './data/seminarios';
+import type { CrearLegajoRequest, EstadoLegajo, Legajo, Cohorte, Seminario } from "@/shared/types/legajo";
 
 let legajos: Legajo[] = [...legajosFixture];
+let cohortes: Cohorte[] = [...cohortesFixture];
+let seminarios: Seminario[] = [...seminariosFixture];
 
 const LATENCIA_MS = { min: 300, max: 800 };
 const randomDelay = () =>
@@ -42,27 +46,27 @@ export const handlers = [
 
     const nuevo: Legajo = {
       id: `leg-${Date.now()}`,
-      numeroLegajo: null,
-      cohorteId: "c0h0rte-2026-0001",
+      numero_legajo: null,
+      cohorte_id: "c1a2b3c4-0001-0000-0000-000000000003",
       dni: body.dni,
       apellido: body.apellido,
       nombre: body.nombre,
       email: body.email,
-      emailAlternativo: body.emailAlternativo,
-      telefonoMovil: body.telefonoMovil,
+      email_alternativo: body.emailAlternativo,
+      telefono_movil: body.telefonoMovil,
       domicilio: body.domicilio,
-      tituloGrado: body.tituloGrado,
+      titulo_grado: body.tituloGrado,
       motivacion: body.motivacion,
       estado: "PENDIENTE",
-      tipoCarrera: body.carreras[0] ?? null,
-      solicitaBeca: body.solicitaBeca,
-      tipoBeca: body.tipoBeca,
+      tipo_carrera: body.carreras[0] ?? null,
+      solicita_beca: body.solicitaBeca,
+      tipo_beca: body.tipoBeca,
       semaforo: "VERDE",
-      semaforoManual: false,
-      fechaInscripcion: new Date().toISOString(),
-      fechaActivacion: null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      semaforo_manual: false,
+      fecha_inscripcion: new Date().toISOString(),
+      fecha_activacion: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
     legajos = [...legajos, nuevo];
 
@@ -74,11 +78,11 @@ export const handlers = [
     await randomDelay();
     const url = new URL(request.url);
     const estado = url.searchParams.get("estado") as EstadoLegajo | null;
-    const cohorteId = url.searchParams.get("cohorteId");
+    const cohorte_id = url.searchParams.get("cohorte_id");
 
     let resultado = legajos;
     if (estado) resultado = resultado.filter((l) => l.estado === estado);
-    if (cohorteId) resultado = resultado.filter((l) => l.cohorteId === cohorteId);
+    if (cohorte_id) resultado = resultado.filter((l) => l.cohorte_id === cohorte_id);
 
     return HttpResponse.json(resultado);
   }),
@@ -100,8 +104,8 @@ export const handlers = [
 
     legajo.estado = estado;
     legajo.updatedAt = new Date().toISOString();
-    if (estado === "COMPLETADO" && !legajo.numeroLegajo) {
-      legajo.numeroLegajo = `26-001-${String(legajos.indexOf(legajo) + 1).padStart(3, "0")}`;
+    if (estado === "COMPLETADO" && !legajo.numero_legajo) {
+      legajo.numero_legajo = `leg-2026-${String(legajos.indexOf(legajo) + 1).padStart(3, "0")}`;
     }
 
     return HttpResponse.json(legajo);
@@ -139,5 +143,25 @@ export const handlers = [
       },
       { status: 201 }
     );
+  }),
+
+  // GET /api/v1/cohortes
+  http.get("/api/v1/cohortes", async ({ request }) => {
+    await randomDelay();
+    const url = new URL(request.url);
+
+    let resultado = cohortes;
+
+    return HttpResponse.json(resultado);
+  }),
+
+  // GET /api/v1/seminarios
+  http.get("/api/v1/seminarios", async ({ request }) => {
+    await randomDelay();
+    const url = new URL(request.url);
+
+    let resultado = seminarios;
+
+    return HttpResponse.json(resultado);
   }),
 ];
