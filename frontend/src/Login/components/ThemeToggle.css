@@ -1,0 +1,18 @@
+.theme-toggle {
+  background-color: var(--login-btn-bg);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--login-btn-text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-align: left;
+  line-height: 1;
+  cursor: pointer;
+  align-self: left;
+  width: fit-content;
+}
