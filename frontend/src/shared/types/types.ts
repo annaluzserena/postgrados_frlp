@@ -20,38 +20,48 @@ export interface Cohorte {
   id: string;
   anio: number;
   nombre: string;
-  abierta: boolean;
-  fechaInicio: string | null;
+  inscripcion_abierta: boolean;
+  fecha_inicio: string | null;
+}
+
+export interface Seminario {
+  id: string;
+  nombre: string;
+  codigo: string;
+  horas_catedra: number;
+  es_obligatorio: boolean;
+  docente: string;
+  email_docente: string;
 }
 
 export interface Legajo {
   id: string;
-  numeroLegajo: string | null; // null hasta que se aprueba
-  cohorteId: string;
+  numero_legajo: string | null; // null hasta que se aprueba
+  cohorte_id: string;
   dni: string;
   apellido: string;
   nombre: string;
   email: string;
-  emailAlternativo?: string;
-  telefonoMovil: string;
+  email_alternativo?: string;
+  telefono_movil: string;
   domicilio: {
     direccion: string;
     ciudad: string;
     provincia: string;
     pais: string;
   };
-  tituloGrado: string;
+  titulo_grado: string;
   motivacion: string;
   estado: EstadoLegajo;
-  tipoCarrera: TipoCarrera | null;
-  solicitaBeca: boolean;
-  tipoBeca?: TipoBeca;
+  tipo_carrera: TipoCarrera | null;
+  solicita_beca: boolean;
+  tipo_beca?: TipoBeca;
   semaforo: Semaforo;
-  semaforoManual: boolean;
-  fechaInscripcion: string | null;
-  fechaActivacion: string | null;
-  createdAt: string;
-  updatedAt: string;
+  semaforo_manual: boolean;
+  fecha_inscripcion: string | null;
+  fecha_activacion: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export type TipoDocumento =
@@ -65,11 +75,11 @@ export type TipoDocumento =
 
 export interface Documento {
   id: string;
-  legajoId: string;
+  legajo_id: string;
   tipo: TipoDocumento;
-  nombreOriginal: string;
-  tamanioBytes: number;
-  fechaSubida: string;
+  nombre_original: string;
+  tamanio_bytes: number;
+  fecha_subida: string;
 }
 
 // Requests
@@ -80,24 +90,24 @@ export interface CrearLegajoRequest {
   nombre: string;
   nacionalidad: string;
   dni: string;
-  telefonoMovil: string;
-  telefonoFijo?: string;
+  telefono_movil: string;
+  telefono_fijo?: string;
   email: string;
-  emailAlternativo: string;
+  email_alternativo?: string;
   domicilio: Legajo["domicilio"];
-  tituloGrado: string;
-  tituloPosgrado?: string;
-  comoConocioLaOferta: string;
+  titulo_grado: string;
+  titulo_posgrado?: string;
+  como_conocio: string;
   motivacion: string; // min 50 caracteres
-  solicitaBeca: boolean;
-  tipoBeca?: TipoBeca;
+  solicita_beca: boolean;
+  tipo_beca?: TipoBeca;
 }
 
 export interface FiltrosLegajo {
   estado?: EstadoLegajo;
-  cohorteId?: string;
-  tipoCarrera?: TipoCarrera;
-  soloConBeca?: boolean;
+  cohorte_id?: string;
+  tipo_carrera?: TipoCarrera;
+  solo_con_beca?: boolean;
   page?: number;
   limit?: number;
 }
