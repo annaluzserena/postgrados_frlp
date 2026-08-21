@@ -1,3 +1,27 @@
+import type { ComponentType, SVGProps } from "react";
+
+/* Roles */
+export type Rol = "aspirante" | "docente" | "admin" | "coordinador" | "cpr" | "estudiante";
+
+export interface User {
+  id: string;
+  nombre: string;
+  rol: Rol;
+  email: string;
+}
+
+export interface MenuItem {
+  id: string;
+  label: string;
+  href: string;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
+  roles?: Rol[];
+}
+
+export interface NotificationSummary {
+  count: number;
+}
+
 export type EstadoLegajo =
   | "BORRADOR"
   | "PENDIENTE"
