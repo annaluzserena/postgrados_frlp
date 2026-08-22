@@ -26,7 +26,7 @@ export default function ThemeToggle() {
     >
       {isDark ? <Sun size={18} /> : <Moon size={18} />}
       <span>
-        MODO<br />{isDark ? 'DIURNO' : 'NOCTURNO'}
+        MODO {isDark ? 'CLARO ': 'OSCURO '}
       </span>
     </button>
   );

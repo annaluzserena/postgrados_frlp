@@ -1,5 +1,7 @@
 import { ArrowLeft } from 'lucide-react';
 import './Header.css';
+import FenixLogo from '../../assets/LogoFenix.png';
+import ThemeToggle from '../../shared/components/ThemeToggle';
 
 interface HeaderProps {
   onBack?: () => void;
@@ -11,17 +13,19 @@ export default function Header({ onBack }: HeaderProps) {
       <div className="header-top">
         <button className="back-button" onClick={onBack}>
           <ArrowLeft size={16} />
-          Volver
+          Salir 
         </button>
+  <ThemeToggle />
 
-        <div className="logo-slot">
-          {/* <img src={fenixLogo} alt="Fénix Posgrado" className="logo-img" /> */}
-          <span className="logo-text">FENIX</span>
-          <span className="logo-subtitle">POSGRADO</span>
-        </div>
       </div>
 
-      <div className="accent-line" />
+      <div className="line-logo-wrapper">
+        <div className="accent-line" />
+        <div className="logo-slot">
+          <img src={FenixLogo} alt="Fénix Posgrado" className="logo-img" />
+        </div>
+      </div>
     </header>
   );
 }
+

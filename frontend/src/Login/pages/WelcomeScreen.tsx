@@ -2,7 +2,6 @@ import { PenLine, ClipboardList } from 'lucide-react';
 import Button from '../components/Button';
 import Header from '../components/Header';
 import './WelcomeScreen.css';
-import ThemeToggle from '../components/ThemeToggle';
 
 export default function WelcomeScreen() {
   return (
@@ -20,7 +19,7 @@ export default function WelcomeScreen() {
         Consultar Estado
       </Button>
 
-     <ThemeToggle />
+   
     </div>
   
   );
