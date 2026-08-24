@@ -1,3 +1,27 @@
+import type { ComponentType, SVGProps } from "react";
+
+/* Roles */
+export type Rol = "aspirante" | "docente" | "admin" | "coordinador" | "cpr" | "estudiante";
+
+export interface User {
+  id: string;
+  nombre: string;
+  rol: Rol;
+  email: string;
+}
+
+export interface MenuItem {
+  id: string;
+  label: string;
+  href: string;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
+  roles?: Rol[];
+}
+
+export interface NotificationSummary {
+  count: number;
+}
+
 export type EstadoLegajo =
   | "BORRADOR"
   | "PENDIENTE"
@@ -54,6 +78,7 @@ export interface Legajo {
   motivacion: string;
   estado: EstadoLegajo;
   tipo_carrera: TipoCarrera | null;
+  carrera_elegida: string;
   solicita_beca: boolean;
   tipo_beca?: TipoBeca;
   semaforo: Semaforo;
@@ -85,7 +110,8 @@ export interface Documento {
 // Requests
 
 export interface CrearLegajoRequest {
-  carreras: TipoCarrera[]; // max 2
+  tipo_carreras: TipoCarrera[]; // max 2
+  carreras: string[];
   apellido: string;
   nombre: string;
   nacionalidad: string;
@@ -110,4 +136,12 @@ export interface FiltrosLegajo {
   solo_con_beca?: boolean;
   page?: number;
   limit?: number;
+}
+
+export interface LegajosPaginados {
+  legajos: Legajo[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }

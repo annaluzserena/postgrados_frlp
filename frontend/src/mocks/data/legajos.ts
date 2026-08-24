@@ -1,4 +1,4 @@
-import type { Legajo } from "@/shared/types/legajo";
+import type { Legajo } from "@/shared/types/types";
 
 const COHORTE_2026 = "c1a2b3c4-0001-0000-0000-000000000003";
 
@@ -17,7 +17,9 @@ export const legajosFixture: Legajo[] = [
     motivacion: "Quiero profundizar en arquitectura de software para liderar proyectos más complejos en mi trabajo actual.",
     estado: "ACTIVO",
     tipo_carrera: "Especializacion",
-    solicita_beca: false,
+    carrera_elegida: "",
+    solicita_beca: true,
+    tipo_beca: "30",
     semaforo: "VERDE",
     semaforo_manual: false,
     fecha_inscripcion: "2026-03-10T14:00:00Z",
@@ -39,8 +41,9 @@ export const legajosFixture: Legajo[] = [
     motivacion: "Busco actualizar mis conocimientos en gestión de proyectos de software a nivel de posgrado.",
     estado: "EN_REVISION",
     tipo_carrera: "Maestria",
+    carrera_elegida: "",
     solicita_beca: true,
-    tipoBeca: "30",
+    tipo_beca: "30",
     semaforo: "VERDE",
     semaforo_manual: false,
     fecha_inscripcion: "2026-06-02T09:30:00Z",
@@ -62,6 +65,7 @@ export const legajosFixture: Legajo[] = [
     motivacion: "Necesito falta completar la copia del título de grado, según indicó la coordinación.",
     estado: "OBSERVADO",
     tipo_carrera: "Especializacion",
+    carrera_elegida: "",
     solicita_beca: false,
     semaforo: "AMARILLO",
     semaforo_manual: false,
@@ -84,6 +88,7 @@ export const legajosFixture: Legajo[] = [
     motivacion: "Estoy a tiempo de completar el trabajo final integrador pero necesito asesoramiento urgente.",
     estado: "ACTIVO",
     tipo_carrera: "Especializacion",
+    carrera_elegida: "",
     solicita_beca: false,
     semaforo: "ROJO",
     semaforo_manual: false,
@@ -106,6 +111,7 @@ export const legajosFixture: Legajo[] = [
     motivacion: "Aún estoy completando mis documentos, todavía no envié el formulario a revisión.",
     estado: "BORRADOR",
     tipo_carrera: null,
+    carrera_elegida: "",
     solicita_beca: false,
     semaforo: "VERDE",
     semaforo_manual: false,
