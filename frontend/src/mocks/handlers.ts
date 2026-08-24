@@ -1,8 +1,15 @@
 import { http, HttpResponse, delay } from "msw";
 import { legajosFixture } from "./data/legajos";
-import { cohortesFixture } from './data/cohortes';
-import { seminariosFixture } from './data/seminarios';
-import type { CrearLegajoRequest, EstadoLegajo, Legajo, Cohorte, Seminario } from "@/shared/types/legajo";
+import { cohortesFixture } from "./data/cohortes";
+import { seminariosFixture } from "./data/seminarios";
+import type {
+  CrearLegajoRequest,
+  EstadoLegajo,
+  Legajo,
+  Cohorte,
+  Seminario,
+  TipoCarrera,
+} from "@/shared/types/types";
 
 let legajos: Legajo[] = [...legajosFixture];
 let cohortes: Cohorte[] = [...cohortesFixture];
@@ -12,10 +19,21 @@ const LATENCIA_MS = { min: 300, max: 800 };
 const randomDelay = () =>
   delay(LATENCIA_MS.min + Math.random() * (LATENCIA_MS.max - LATENCIA_MS.min));
 
-function errorResponse(status: number, error: string, message: string, field?: string) {
+function errorResponse(
+  status: number,
+  error: string,
+  message: string,
+  field?: string,
+) {
   return HttpResponse.json(
-    { statusCode: status, error, message, field, timestamp: new Date().toISOString() },
-    { status }
+    {
+      statusCode: status,
+      error,
+      message,
+      field,
+      timestamp: new Date().toISOString(),
+    },
+    { status },
   );
 }
 
@@ -31,7 +49,7 @@ export const handlers = [
         400,
         "VALIDATION_ERROR",
         "Ya existe una preinscripción con este DNI para la cohorte actual",
-        "dni"
+        "dni",
       );
     }
 
@@ -40,7 +58,7 @@ export const handlers = [
         400,
         "VALIDATION_ERROR",
         "La motivación debe tener al menos 50 caracteres",
-        "motivacion"
+        "motivacion",
       );
     }
 
@@ -52,15 +70,16 @@ export const handlers = [
       apellido: body.apellido,
       nombre: body.nombre,
       email: body.email,
-      email_alternativo: body.emailAlternativo,
-      telefono_movil: body.telefonoMovil,
+      email_alternativo: body.email_alternativo,
+      telefono_movil: body.telefono_movil,
       domicilio: body.domicilio,
-      titulo_grado: body.tituloGrado,
+      titulo_grado: body.titulo_grado,
       motivacion: body.motivacion,
       estado: "PENDIENTE",
-      tipo_carrera: body.carreras[0] ?? null,
-      solicita_beca: body.solicitaBeca,
-      tipo_beca: body.tipoBeca,
+      tipo_carrera: body.tipo_carreras[0] ?? null,
+      carrera_elegida: body.carreras[0] ?? null,
+      solicita_beca: body.solicita_beca,
+      tipo_beca: body.tipo_beca,
       semaforo: "VERDE",
       semaforo_manual: false,
       fecha_inscripcion: new Date().toISOString(),
@@ -79,12 +98,33 @@ export const handlers = [
     const url = new URL(request.url);
     const estado = url.searchParams.get("estado") as EstadoLegajo | null;
     const cohorte_id = url.searchParams.get("cohorte_id");
+    const beca =
+      (url.searchParams.get("solo_con_beca") === "true" ? true : false) ||
+      undefined;
+    const tipo_carrera = url.searchParams.get("tipo_carrera");
+    const page = Number(url.searchParams.get("page") ?? "1");
+    const limit = Number(url.searchParams.get("limit") ?? "10");
 
     let resultado = legajos;
     if (estado) resultado = resultado.filter((l) => l.estado === estado);
-    if (cohorte_id) resultado = resultado.filter((l) => l.cohorte_id === cohorte_id);
+    if (cohorte_id)
+      resultado = resultado.filter((l) => l.cohorte_id === cohorte_id);
+    if (beca) resultado = resultado.filter((l) => l.solicita_beca === beca);
+    if (tipo_carrera)
+      resultado = resultado.filter((l) => l.tipo_carrera === tipo_carrera);
 
-    return HttpResponse.json(resultado);
+    const total = resultado.length;
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    const inicio = (page - 1) * limit;
+    const paginados = resultado.slice(inicio, inicio + limit);
+
+    return HttpResponse.json({
+    legajos: paginados,
+    total,
+    page,
+    limit,
+    totalPages,
+  });
   }),
 
   // GET /api/v1/legajos/:id
@@ -103,7 +143,7 @@ export const handlers = [
     if (!legajo) return errorResponse(404, "NOT_FOUND", "Legajo no encontrado");
 
     legajo.estado = estado;
-    legajo.updatedAt = new Date().toISOString();
+    legajo.updated_at = new Date().toISOString();
     if (estado === "COMPLETADO" && !legajo.numero_legajo) {
       legajo.numero_legajo = `leg-2026-${String(legajos.indexOf(legajo) + 1).padStart(3, "0")}`;
     }
@@ -119,16 +159,25 @@ export const handlers = [
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
-    if (!file) return errorResponse(400, "VALIDATION_ERROR", "No se envió ningún archivo");
+    if (!file)
+      return errorResponse(
+        400,
+        "VALIDATION_ERROR",
+        "No se envió ningún archivo",
+      );
 
     if (file.type !== "application/pdf") {
-      return errorResponse(400, "VALIDATION_ERROR", "Solo se aceptan archivos en formato PDF");
+      return errorResponse(
+        400,
+        "VALIDATION_ERROR",
+        "Solo se aceptan archivos en formato PDF",
+      );
     }
     if (file.size > 5 * 1024 * 1024) {
       return errorResponse(
         400,
         "VALIDATION_ERROR",
-        "El archivo es demasiado grande. Máximo permitido: 5MB"
+        "El archivo es demasiado grande. Máximo permitido: 5MB",
       );
     }
 
@@ -141,7 +190,7 @@ export const handlers = [
         tamanioBytes: file.size,
         fechaSubida: new Date().toISOString(),
       },
-      { status: 201 }
+      { status: 201 },
     );
   }),
 
@@ -150,7 +199,7 @@ export const handlers = [
     await randomDelay();
     const url = new URL(request.url);
 
-    let resultado = cohortes;
+    const resultado = cohortes;
 
     return HttpResponse.json(resultado);
   }),
@@ -160,7 +209,7 @@ export const handlers = [
     await randomDelay();
     const url = new URL(request.url);
 
-    let resultado = seminarios;
+    const resultado = seminarios;
 
     return HttpResponse.json(resultado);
   }),
