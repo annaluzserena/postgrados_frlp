@@ -1,0 +1,40 @@
+.login-input {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: var(--login-input-bg);
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-sizing: border-box;
+}
+
+.login-input input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 16px;
+  color: var(--login-input-text);
+}
+
+.login-input input::placeholder {
+  color: var(--login-input-text);
+  opacity: 0.6;
+}
+
+.input-icon {
+  display: flex;
+  align-items: center;
+  color: var(--login-input-text);
+}
+
+.toggle-password {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: var(--login-input-text);
+  opacity: 0.6;
+}

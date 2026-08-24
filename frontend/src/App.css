@@ -182,3 +182,7 @@
     border-right-color: var(--border);
   }
 }
+
+body {
+  background-color: #F2F4F7; /* El color de fondo gris claro del diseño original */
+}

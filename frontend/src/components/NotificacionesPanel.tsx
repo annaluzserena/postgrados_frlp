@@ -1,5 +1,5 @@
 // frontend/src/components/NotificacionesPanel.tsx
-
+import './NotificacionesPanel.css';
 export const NotificacionesPanel = () => {
   const closeNotifDrawer = () => {
     console.log("Cerrar cajón de notificaciones");
@@ -10,7 +10,7 @@ export const NotificacionesPanel = () => {
   };
 
   return (
-    <div className="notif-drawer" id="notifDrawer">
+    <div className="notif-drawer " id="notifDrawer">
       
       <div className="notif-drawer-header">
         <div className="notif-drawer-title">Centro de notificaciones</div>
@@ -19,7 +19,7 @@ export const NotificacionesPanel = () => {
         </button>
       </div>
       
-      <div className="notif-drawer-body" id="drawerNotifList">
+      <div className="notif-drawer-body"  id="drawerNotifList">
          <p style={{ padding: '1rem', color: '#666', fontSize: '14px' }}>
             No hay notificaciones nuevas.
          </p>

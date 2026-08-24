@@ -6,15 +6,20 @@ import TestLegajos from './TestLegajos'
 import { NotificacionesPanel } from './components/NotificacionesPanel'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+// Importación que agregó tu compañero (rama main)
+import LoginScreen from './Login/pages/Login';
 
+function App() {
   return (
     <>
+        {/* Pantalla de login de tu compañero */}
+        <LoginScreen />
+
+        {/* Tu panel y componentes de prueba */}
         <NotificacionesPanel/>
         <TestLegajos/>      
     </>
   )
 }
 
-export default App
+export default App;

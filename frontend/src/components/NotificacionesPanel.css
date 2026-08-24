@@ -1,0 +1,76 @@
+/* 1. Variables globales de color y fuente */
+:root {
+  --surface: #FFFFFF;
+  --surface2: #EFF1F5;
+  --border: #DDE1EB;
+  --text: #0F1623;
+  --text-3: #9AA0B2;
+  --sans: 'DM Sans', sans-serif;
+}
+
+/* 2. Estructura principal del Drawer */
+.notif-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0;
+  width: 360px; 
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+  z-index: 90; 
+  transform: translateX(100%);
+  transition: transform 0.22s ease;
+  display: flex; flex-direction: column;
+  font-family: var(--sans);
+  color: var(--text);
+}
+
+.notif-drawer.open { 
+  transform: translateX(0); 
+}
+
+/* 3. Cabecera y cuerpo */
+.notif-drawer-header {
+  padding: 16px 20px; 
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.notif-drawer-title { 
+  font-size: 15px; font-weight: 500; 
+}
+
+.notif-drawer-close { 
+  border: none; background: none; 
+  color: var(--text-3); font-size: 18px; 
+  cursor: pointer; padding: 4px; 
+}
+
+.notif-drawer-close:hover { 
+  color: var(--text); 
+}
+
+.notif-drawer-body { 
+  flex: 1; overflow-y: auto; 
+}
+
+/* 4. Pie de página y Botón */
+.notif-drawer-footer {
+  padding: 12px 20px; border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.btn:hover {
+  background: var(--surface2);
+}
