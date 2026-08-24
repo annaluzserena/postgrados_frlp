@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Moon, Sun } from 'lucide-react';
-import './ThemeToggle.css';
 
 export default function ThemeToggle() {
   const [isDark, setIsDark] = useState(() => {
@@ -9,25 +8,19 @@ export default function ThemeToggle() {
   });
 
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('theme', 'light');
-    }
+    document.documentElement.classList.toggle('dark', isDark);
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
   }, [isDark]);
 
   return (
     <button
-      className="theme-toggle"
+      type="button"
       onClick={() => setIsDark(!isDark)}
       aria-label="Cambiar tema"
+      className="flex items-center gap-1.5 rounded-full border border-line bg-paper-surface px-3 py-1.5 text-xs font-semibold tracking-wide text-ink-secondary transition-colors hover:bg-paper-elevated"
     >
-      {isDark ? <Sun size={18} /> : <Moon size={18} />}
-      <span>
-        MODO {isDark ? 'CLARO ': 'OSCURO '}
-      </span>
+      {isDark ? <Sun size={16} /> : <Moon size={16} />}
+      <span>MODO {isDark ? 'CLARO' : 'OSCURO'}</span>
     </button>
   );
 }
