@@ -3,8 +3,10 @@ import { User, Lock, Mail } from 'lucide-react';
 import Header from '../components/Header';
 import Input from '../components/Input';
 import Checkbox from '../components/Checkbox';
-import Button from '../components/Button';
+import {Button} from '../../shared/components/Button';
 import VentanaEmergente from '../../shared/components/VentanaEmergente';
+import LogoFenix from '../../assets/LogoFenix.png';
+import UtnLogo from '../../assets/UtnLogo.png';
 
 export default function LoginScreen() {
   const [usuario, setUsuario] = useState('');
@@ -19,10 +21,30 @@ export default function LoginScreen() {
   };
 
   return (
-    <div className="screen-shell">
-      <div className="screen-card">
+    <div className="flex min-h-screen w-full bg-paper">
+      {/* Panel izquierdo: solo aparece en desktop */}
+      <div className="hidden md:flex md:w-1/2 md:flex-col md:items-center md:bg-brand-700 md:p-12">
+        <div className="flex flex-1 flex-col items-center justify-center">
+          <img
+            src={LogoFenix}
+            alt="Fénix Posgrado"
+            className="h-48 w-auto object-contain"
+          />
+          <p className="mt-0.5 text-xs font-light tracking-[0.2em] text-brand-100/70">
+            SISTEMA DE POSTGRADO 2026
+          </p>
+        </div>
 
-        <Header onBack={() => console.log('volver')} />
+        <img
+          src={UtnLogo}
+          alt="UTN FRLP"
+          className="mb-2 mt-10 h-4 w-auto max-w-[100px] object-contain opacity-70"
+        />
+      </div>
+
+      {/* Panel derecho: sin cambios respecto a lo que ya tenías */}
+      <div className="flex w-full flex-col md:w-1/2">
+        <Header onBack={() => console.log('volver')} hideLogoOnDesktop />
 
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4 px-6 pb-8 pt-8">
           <Input

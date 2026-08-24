@@ -1,26 +1,18 @@
-import { useState, useEffect } from 'react';
 import { Moon, Sun } from 'lucide-react';
+import { useTheme } from '@/shared/context/useTheme';
 
 export default function ThemeToggle() {
-  const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    return saved === 'dark';
-  });
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', isDark);
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  }, [isDark]);
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'oscuro';
 
   return (
     <button
       type="button"
-      onClick={() => setIsDark(!isDark)}
-      aria-label="Cambiar tema"
-      className="flex items-center gap-1.5 rounded-full border border-line bg-paper-surface px-3 py-1.5 text-xs font-semibold tracking-wide text-ink-secondary transition-colors hover:bg-paper-elevated"
+      onClick={toggleTheme}
+      className="flex items-center gap-1.5 rounded-full border border-line bg-paper-surface px-3 py-1.5 text-sm font-medium text-ink-secondary transition-colors hover:bg-paper-elevated"
     >
       {isDark ? <Sun size={16} /> : <Moon size={16} />}
-      <span>MODO {isDark ? 'CLARO' : 'OSCURO'}</span>
+      {isDark ? 'MODO CLARO' : 'MODO OSCURO'}
     </button>
   );
 }
