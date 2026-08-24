@@ -134,58 +134,59 @@
     @apply text-sm font-medium text-ink-secondary;
   }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
-
-input,
-select,
-textarea {
-  @apply rounded-lg border border-line bg-paper-surface px-3 py-2 text-sm text-ink
-    placeholder:text-ink-muted
-    focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1 focus:ring-offset-paper;
-}
-
-::selection {
-  @apply bg-brand-200 text-brand-900;
-}
-
-@layer utilities {
-  /**
-   * Scrollbar que aparece/desaparece con una transición suave en vez de
-   * "saltar" cuando cambia el tamaño del contenido filtrado.
-   */
-  .scroll-fade {
-    scrollbar-width: thin;
-    scrollbar-color: transparent transparent;
-    transition: scrollbar-color 0.25s ease;
+  code {
+    font-size: 15px;
+    line-height: 135%;
+    padding: 4px 8px;
+    background: var(--code-bg);
   }
 
-  .scroll-fade:hover,
-  .scroll-fade:focus-within {
-    scrollbar-color: var(--border) transparent;
+  input,
+  select,
+  textarea {
+    @apply rounded-lg border border-line bg-paper-surface px-3 py-2 text-sm text-ink
+      placeholder:text-ink-muted
+      focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1 focus:ring-offset-paper;
   }
 
-  .scroll-fade::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+  ::selection {
+    @apply bg-brand-200 text-brand-900;
   }
 
-  .scroll-fade::-webkit-scrollbar-track {
-    background: transparent;
-  }
+  @layer utilities {
+    /**
+     * Scrollbar que aparece/desaparece con una transición suave en vez de
+     * "saltar" cuando cambia el tamaño del contenido filtrado.
+     */
+    .scroll-fade {
+      scrollbar-width: thin;
+      scrollbar-color: transparent transparent;
+      transition: scrollbar-color 0.25s ease;
+    }
 
-  .scroll-fade::-webkit-scrollbar-thumb {
-    background-color: transparent;
-    border-radius: 9999px;
-    transition: background-color 0.25s ease;
-  }
+    .scroll-fade:hover,
+    .scroll-fade:focus-within {
+      scrollbar-color: var(--border) transparent;
+    }
 
-  .scroll-fade:hover::-webkit-scrollbar-thumb,
-  .scroll-fade:focus-within::-webkit-scrollbar-thumb {
-    background-color: var(--border);
+    .scroll-fade::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    .scroll-fade::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .scroll-fade::-webkit-scrollbar-thumb {
+      background-color: transparent;
+      border-radius: 9999px;
+      transition: background-color 0.25s ease;
+    }
+
+    .scroll-fade:hover::-webkit-scrollbar-thumb,
+    .scroll-fade:focus-within::-webkit-scrollbar-thumb {
+      background-color: var(--border);
+    }
   }
 }
