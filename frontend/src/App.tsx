@@ -1,13 +1,20 @@
-import Dashboard from './dashboard-coordinador/pages/Dashboard'
-//import './App.css'
+/*
+import WelcomeScreen from './Login/pages/WelcomeScreen';
 
 function App() {
-
   return (
-    <>
-        <Dashboard/>      
-    </>
-  )
+    <WelcomeScreen />
+  );
+}*/
+
+
+
+import LoginScreen from './Login/pages/Login';
+
+function App() {
+  return (
+    <LoginScreen />
+  );
 }
 
-export default App
+export default App;
