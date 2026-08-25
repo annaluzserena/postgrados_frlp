@@ -8,12 +8,12 @@ import type {
   Legajo,
   Cohorte,
   Seminario,
-  TipoCarrera,
 } from "@/shared/types/types";
+import { getDocumentosPorLegajo } from "./data/documentos";
 
 let legajos: Legajo[] = [...legajosFixture];
-let cohortes: Cohorte[] = [...cohortesFixture];
-let seminarios: Seminario[] = [...seminariosFixture];
+const cohortes: Cohorte[] = [...cohortesFixture];
+const seminarios: Seminario[] = [...seminariosFixture];
 
 const LATENCIA_MS = { min: 300, max: 800 };
 const randomDelay = () =>
@@ -194,10 +194,15 @@ export const handlers = [
     );
   }),
 
+  // GET /api/v1/legajos/:id/documentos
+  http.get("/api/v1/legajos/:id/documentos", async ({ params }) => {
+  await randomDelay();
+  return HttpResponse.json(getDocumentosPorLegajo(params.id as string));
+}),
+
   // GET /api/v1/cohortes
-  http.get("/api/v1/cohortes", async ({ request }) => {
+  http.get("/api/v1/cohortes", async () => {
     await randomDelay();
-    const url = new URL(request.url);
 
     const resultado = cohortes;
 
@@ -205,9 +210,8 @@ export const handlers = [
   }),
 
   // GET /api/v1/seminarios
-  http.get("/api/v1/seminarios", async ({ request }) => {
+  http.get("/api/v1/seminarios", async () => {
     await randomDelay();
-    const url = new URL(request.url);
 
     const resultado = seminarios;
 
