@@ -1,11 +1,11 @@
-/*
-import WelcomeScreen from './Login/pages/WelcomeScreen';
+
+/*import WelcomeScreen from './Login/pages/WelcomeScreen';
 
 function App() {
   return (
     <WelcomeScreen />
   );
-}*/
+}
 
 
 
@@ -15,6 +15,14 @@ function App() {
   return (
     <LoginScreen />
   );
-}
+}*/
 
+
+import NotificacionesScreen from './AlertasNotificaciones/pages/Alerta';
+
+function App() {
+  return (
+    <NotificacionesScreen />
+  );
+}
 export default App;

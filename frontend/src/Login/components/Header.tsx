@@ -1,31 +1,46 @@
 import { ArrowLeft } from 'lucide-react';
-import './Header.css';
-import FenixLogo from '../../assets/LogoFenix.png';
+import LogoFenix from '../../assets/LogoFenix.png';
 import ThemeToggle from '../../shared/components/ThemeToggle';
 
 interface HeaderProps {
   onBack?: () => void;
+  hideLogoOnDesktop?: boolean;
 }
 
-export default function Header({ onBack }: HeaderProps) {
+export default function Header({ onBack, hideLogoOnDesktop = false }: HeaderProps) {
   return (
-    <header className="login-header">
-      <div className="header-top">
-        <button className="back-button" onClick={onBack}>
+    <header className="flex flex-col items-center px-6 pt-6 pb-4">
+      <div className="flex w-full items-center justify-between">
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center gap-1 rounded-full border border-line bg-paper-surface px-3 py-1.5 text-sm font-medium text-ink-secondary transition-colors hover:bg-paper-elevated"
+        >
           <ArrowLeft size={16} />
-          Salir 
+          Salir
         </button>
-  <ThemeToggle />
 
+        <ThemeToggle />
       </div>
 
-      <div className="line-logo-wrapper">
-        <div className="accent-line" />
-        <div className="logo-slot">
-          <img src={FenixLogo} alt="Fénix Posgrado" className="logo-img" />
+      <div
+        className={`mt-3 flex w-full flex-col items-center ${
+          hideLogoOnDesktop ? 'md:hidden' : ''
+        }`}
+      >
+        <img
+          src={LogoFenix}
+          alt=""
+          className="h-12 w-auto object-contain md:h-16"
+        />
+
+        <div className="mt-1 flex w-full items-center justify-center gap-3">
+          <span className="h-px max-w-12 flex-1 bg-gradient-to-r from-transparent to-brand-500 md:max-w-16" />
+          <div className="flex flex-col items-center">
+            
+          </div>
         </div>
       </div>
     </header>
   );
 }
-
