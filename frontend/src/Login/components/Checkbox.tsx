@@ -1,5 +1,4 @@
 import { Check } from 'lucide-react';
-import './Checkbox.css';
 
 interface CheckboxProps {
   checked: boolean;
@@ -9,14 +8,18 @@ interface CheckboxProps {
 
 export default function Checkbox({ checked, onChange, label }: CheckboxProps) {
   return (
-    <label className="login-checkbox">
-      <div 
-        className={`checkbox ${checked ? 'checked' : ''}`}
+    <label className="flex cursor-pointer select-none items-center gap-2">
+      <div
         onClick={onChange}
+        className={`flex h-5 w-5 items-center justify-center rounded-md border transition-colors ${
+          checked
+            ? 'border-brand-500 bg-brand-500 text-white'
+            : 'border-line bg-paper-surface text-transparent'
+        }`}
       >
-        {checked && <Check size={16} />}
+        <Check size={14} strokeWidth={3} />
       </div>
-      <span>{label}</span>
+      <span className="text-sm text-ink-secondary">{label}</span>
     </label>
   );
 }

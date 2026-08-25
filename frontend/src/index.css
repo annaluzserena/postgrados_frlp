@@ -134,6 +134,13 @@
     @apply text-sm font-medium text-ink-secondary;
   }
 
+<<<<<<< HEAD
+=======
+  /* FIX: este bloque estaba anidado adentro de `code { }`, por eso nunca
+     aplicaba a los inputs reales de la app (quedaba como `code input`).
+     Ahora es una regla propia, hermana de `code`, así que sí afecta a todos
+     los input/select/textarea del proyecto. */
+>>>>>>> 674a5223058e74a6a05993901ecaa708fd713d55
   code {
     font-size: 15px;
     line-height: 135%;
@@ -187,6 +194,31 @@
     .scroll-fade:hover::-webkit-scrollbar-thumb,
     .scroll-fade:focus-within::-webkit-scrollbar-thumb {
       background-color: var(--border);
+    }
+  }
+}
+
+/* ------------------------------------------------------------------
+   NUEVO: layout responsive del login (mobile -> desktop)
+   Centraliza acá el breakpoint "modo compu" / "modo celu" en vez de
+   repetir clases md: sueltas en el componente.
+------------------------------------------------------------------- */
+@layer components {
+  .screen-shell {
+    @apply flex min-h-screen w-full items-center justify-center bg-paper;
+  }
+
+  .screen-card {
+    @apply flex w-full max-w-lg flex-col bg-paper;
+  }
+
+  @media (min-width: 768px) {
+    .screen-shell {
+      @apply bg-paper-elevated p-6;
+    }
+
+    .screen-card {
+      @apply rounded-2xl border border-line shadow-card;
     }
   }
 }
