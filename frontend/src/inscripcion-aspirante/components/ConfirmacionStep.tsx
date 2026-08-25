@@ -1,5 +1,5 @@
-import type { DatosPersonales, DatosAcademicos, DatosDocumentos } from "../types";
-import { DOCUMENTOS_REQUERIDOS } from "../types";
+import type { DatosPersonales, DatosAcademicos, DatosDocumentos } from "../../shared/types/types.ts";
+import { DOCUMENTOS_REQUERIDOS } from "../../shared/types/types.ts";
 
 interface ConfirmacionStepProps {
   datosPersonales: DatosPersonales;

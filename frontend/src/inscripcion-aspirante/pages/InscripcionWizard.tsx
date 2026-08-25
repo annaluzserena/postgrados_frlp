@@ -13,7 +13,7 @@ import {
   type DatosAcademicos,
   DATOS_DOCUMENTOS_INICIAL,
   type DatosDocumentos,
-} from "../types";
+} from "../../shared/types/types.ts";
 
 const STEPS: Step[] = [
   { id: "personales", label: "Personales" },

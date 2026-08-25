@@ -4,7 +4,7 @@ import {
   DOCUMENTOS_REQUERIDOS,
   type DatosDocumentos,
   type DocumentoRequerido,
-} from "../types";
+} from "../../shared/types/types.ts";
 
 interface DatosDocumentosFormProps {
   initialData: DatosDocumentos;

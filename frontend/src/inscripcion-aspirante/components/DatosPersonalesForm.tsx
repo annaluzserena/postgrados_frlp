@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Button } from "@/shared/components/Button";
-import type { DatosPersonales } from "../types";
+import type { DatosPersonales } from "../../shared/types/types.ts";
 
 interface DatosPersonalesFormProps {
   initialData: DatosPersonales;

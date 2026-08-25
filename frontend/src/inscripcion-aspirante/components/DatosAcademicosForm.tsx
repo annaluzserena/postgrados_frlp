@@ -3,7 +3,7 @@ import {
   CARRERAS_POSGRADO,
   CANALES_DIFUSION,
   type DatosAcademicos,
-} from "../types";
+} from "../../shared/types/types.ts";
 
 interface DatosAcademicosFormProps {
   initialData: DatosAcademicos;
