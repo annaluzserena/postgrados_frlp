@@ -1,52 +1,56 @@
-<<<<<<< HEAD
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import TestLegajos from './TestLegajos'
-import { NotificacionesPanel } from './components/NotificacionesPanel'
-import './App.css'
-=======
+import { useState } from 'react';
 
-/*import WelcomeScreen from './Login/pages/WelcomeScreen';
+// 1. Importamos el componente base que pidió tu equipo
+import { Sidebar } from './shared/components/Sidebar'; 
 
-function App() {
-  return (
-    <WelcomeScreen />
-  );
-}
-
-
->>>>>>> 65976713284f276a5e58ff2a0e13a65f7d815a05
-
-// Importación que agregó tu compañero (rama main)
+// 2. Importamos todos los módulos del equipo para NO perder el trabajo de nadie
 import LoginScreen from './Login/pages/Login';
-
-function App() {
-  return (
-HEAD
-    <>
-        {/* Pantalla de login de tu compañero */}
-        <LoginScreen />
-
-        {/* Tu panel y componentes de prueba */}
-        <NotificacionesPanel/>
-        <TestLegajos/>      
-    </>
-  )
-}
-=======
-    <LoginScreen />
-  );
-}*/
->>>>>>> 65976713284f276a5e58ff2a0e13a65f7d815a05
-
-
+import LegajoPage from './Legajo/pages/LegajoPage';
 import NotificacionesScreen from './AlertasNotificaciones/pages/Alerta';
 
+// 3. Importamos tus componentes locales
+import { NotificacionesPanel } from './components/NotificacionesPanel';
+import TestLegajos from './TestLegajos';
+
 function App() {
+  // Estado para probar tu panel
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+
   return (
-    <NotificacionesScreen />
+    <div style={{ display: 'flex', width: '100%', minHeight: '100vh' }}>
+      
+      {/* Barra lateral izquierda de Anna */}
+      <Sidebar />
+
+      {/* Área principal derecha */}
+      <div style={{ flex: 1, position: 'relative', padding: '20px' }}>
+        
+        {/* 
+          MÓDULOS DEL EQUIPO: 
+          Descomenta (quítale las barras //) al que necesites probar. 
+          Están todos a salvo aquí para no romper el trabajo de nadie.
+        */}
+        
+        {/* <LoginScreen /> */}
+        <LegajoPage />
+        {/* <NotificacionesScreen /> */}
+
+
+        {/* 
+          TU PANEL DE PRUEBA:
+          Puedes descomentar esto cuando necesites ver tu cajón de notificaciones
+        */}
+        {/*
+        <button onClick={() => setIsPanelOpen(true)}>
+          🔔 Abrir Notificaciones
+        </button>
+        <NotificacionesPanel isOpen={isPanelOpen} onClose={() => setIsPanelOpen(false)} />
+        <TestLegajos />
+        */}
+        
+      </div>
+    </div>
   );
 }
+
 export default App;
