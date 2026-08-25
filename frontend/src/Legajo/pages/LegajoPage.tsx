@@ -1,94 +1,102 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DetalleLegajo from "../components/DetalleLegajo";
-import "./LegajoPage.css";
-
-import type { Alumno } from "../types/alumno";
+import type { Legajo } from "@/shared/types/types";
 
 export default function LegajoPage() {
-  const alumnos: Alumno[] = [
-    {
-      id: "MR",
-      iniciales: "MR",
-      nombre: "María Rodríguez",
-      carrera: "Ing. en Sistemas",
-      legajoNro: "2025-0041",
-      cohorte: "2025-A",
-      dni: "38.451.902",
-      nacimiento: "14/03/1999",
-      email: "m.rodriguez@mail.com",
-      telefono: "+54 9 221 555-0172",
-      estadoDoc: "✓ Completa",
-      fechaInscripcion: "03/02/2025",
-      documentos: ["DNI ✓", "Cert. analítico ✓", "Partida de nacimiento ✓", "Foto 4×4 ✓", "Declaración jurada ✓"]
-    },
-    {
-      id: "CL",
-      iniciales: "CL",
-      nombre: "Carlos López",
-      carrera: "Medicina",
-      legajoNro: "2025-0042",
-      cohorte: "2025-A",
-      dni: "35.111.222",
-      nacimiento: "22/07/1995",
-      email: "carlos.lopez@mail.com",
-      telefono: "+54 9 221 444-8899",
-      estadoDoc: "⚠ Pendiente",
-      fechaInscripcion: "05/02/2025",
-      documentos: ["DNI ✓", "Cert. analítico ⚠", "Partida de nacimiento ✓", "Foto 4×4 ✓", "Declaración jurada ✓"]
-    },
-    {
-      id: "AV",
-      iniciales: "AV",
-      nombre: "Ana Villalba",
-      carrera: "Derecho",
-      legajoNro: "2025-0043",
-      cohorte: "2025-A",
-      dni: "40.987.123",
-      nacimiento: "10/11/2000",
-      email: "ana.villalba@mail.com",
-      telefono: "+54 9 221 333-2211",
-      estadoDoc: "⟳ En revisión",
-      fechaInscripcion: "10/02/2025",
-      documentos: ["DNI ✓", "Cert. analítico ✓", "Partida de nacimiento ⟳", "Foto 4×4 ✓", "Declaración jurada ✓"]
-    }
-  ];
+  const [legajos, setLegajos] = useState<Legajo[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [alumnoSeleccionado, setAlumnoSeleccionado] = useState<Legajo | null>(null);
 
-  const [alumnoSeleccionado, setAlumnoSeleccionado] = useState<Alumno>(alumnos[0]);
+  useEffect(() => {
+    fetch("/api/v1/legajos")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Datos recibidos de la API:", data);
+        // Si API devuelve un objeto paginado con la clave 'legajos'
+        const lista = data.legajos ? data.legajos : (Array.isArray(data) ? data : []);
+        setLegajos(lista);
+        if (lista.length > 0) {
+          setAlumnoSeleccionado(lista[0]);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error al cargar los legajos:", err);
+        setLoading(false);
+      });
+  }, []);
 
   const handleExportPDF = () => {
-    alert(`Generando PDF del legajo de ${alumnoSeleccionado.nombre}…`);
+    if (!alumnoSeleccionado) return;
+    alert(`Generando PDF del legajo de ${alumnoSeleccionado.nombre} ${alumnoSeleccionado.apellido}…`);
   };
 
+  if (loading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-paper text-ink">
+        <p className="text-sm font-medium animate-pulse">Cargando legajos...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="legajo-container">
-      <h2 className="legajo-title">Módulo de Gestión: Legajo Digital</h2>
+    <div className="flex h-full w-full flex-col overflow-hidden p-6 bg-paper text-ink">
+      <h1 className="mb-6 text-xl font-bold tracking-tight">
+        Legajo Digital
+      </h1>
       
-      <div className="legajo-layout">
-        {/* Sidebar */}
-        <div className="legajo-sidebar">
-          <div className="legajo-sidebar-title">Alumnos</div>
-          <div className="legajo-list">
-            {alumnos.map((alum) => {
-              const isActive = alumnoSeleccionado.id === alum.id;
-              return (
-                <div
-                  key={alum.id}
-                  onClick={() => setAlumnoSeleccionado(alum)}
-                  className={`legajo-card ${isActive ? "active" : ""}`}
-                >
-                  <div className="legajo-card-icon">📄</div>
-                  <div>
-                    <div className="legajo-card-name">{alum.nombre}</div>
-                    <div className="legajo-card-id">#{alum.legajoNro}</div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 h-full overflow-hidden">
+        
+        {/* Listado alumnos (columna izquierda) */}
+        <div className="lg:col-span-4 flex flex-col gap-3 overflow-hidden">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-secondary">
+            Alumnos ({legajos.length})
+          </h2>
+          <div className="flex flex-col gap-2 overflow-y-auto pr-2 scroll-fade">
+            {legajos.length === 0 ? (
+              <p className="text-xs text-ink-muted p-2">No se encontraron legajos disponibles.</p>
+            ) : (
+              legajos.map((legajo) => {
+                const isActive = alumnoSeleccionado?.id === legajo.id;
+                const iniciales = `${legajo.nombre?.[0] || ""}${legajo.apellido?.[0] || ""}`.toUpperCase();
+
+                return (
+                  <div
+                    key={legajo.id}
+                    onClick={() => setAlumnoSeleccionado(legajo)}
+                    className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition-all ${
+                      isActive 
+                        ? "border-brand-500 bg-surface-alt shadow-sm" 
+                        : "border-line bg-surface hover:bg-surface-alt/50"
+                    }`}
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-600 font-bold dark:bg-brand-950 dark:text-brand-300">
+                      {iniciales || "LP"}
+                    </div>
+                    <div>
+                      <div className="font-semibold text-ink">{legajo.apellido}, {legajo.nombre}</div>
+                      <div className="text-xs text-ink-secondary">
+                        {legajo.numero_legajo ? `#${legajo.numero_legajo}` : `Estado: ${legajo.estado}`}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
 
-        {/* Panel Principal por Componente */}
-        <DetalleLegajo alumno={alumnoSeleccionado} onExportPDF={handleExportPDF} />
+        {/* Detalle alumno (columna derecha) */}
+        <div className="lg:col-span-8 flex flex-col overflow-y-auto rounded-2xl border border-line bg-surface p-6 shadow-card scroll-fade">
+          {alumnoSeleccionado ? (
+            <DetalleLegajo alumno={alumnoSeleccionado} onExportPDF={handleExportPDF} />
+          ) : (
+            <div className="flex h-full items-center justify-center text-ink-secondary">
+              Selecciona un legajo para ver los detalles.
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );
