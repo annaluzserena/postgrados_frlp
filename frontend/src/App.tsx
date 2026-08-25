@@ -1,18 +1,19 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import TestLegajos from './TestLegajos'
-import './App.css'
+import { WorkflowLegajo } from './inscripcion/components/WorkflowLegajo';
+import { legajosFixture } from './mocks/data/legajos';
 
 function App() {
-  const [count, setCount] = useState(0)
+  // Tomamos el primer legajo de prueba que hicimos en el mock 
+  const legajoDePrueba = legajosFixture[0];
 
   return (
-    <>
-        <TestLegajos/>      
-    </>
-  )
+    <div style={{ padding: '40px', fontFamily: 'sans-serif' }}>
+      <h2>Prueba de tu componente:</h2>
+      
+      {/* Acá estamos llamando a tu componente y pasándole el dato dinámico */}
+      <WorkflowLegajo legajo={legajoDePrueba} />
+      
+    </div>
+  );
 }
 
-export default App
+export default App;
