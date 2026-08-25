@@ -69,21 +69,37 @@ export function ConfirmacionStep({
   const faltantes = obligatorios.filter((d) => !datosDocumentos[d.id]);
   const documentacionCompleta = faltantes.length === 0;
 
+  const nombreCompleto = [datosPersonales.apellido, datosPersonales.nombre]
+    .filter(Boolean)
+    .join(", ");
+
   const descPersonales = [
-    datosPersonales.nombreCompleto,
-    datosPersonales.dni && `DNI ${datosPersonales.dni}`,
+    nombreCompleto,
+    datosPersonales.documento && `DNI ${datosPersonales.documento}`,
     datosPersonales.nacionalidad && `Nacionalidad ${datosPersonales.nacionalidad}`,
-    datosPersonales.direccion,
+    [
+      datosPersonales.domicilio.direccion,
+      datosPersonales.domicilio.ciudad,
+      datosPersonales.domicilio.provincia,
+    ]
+      .filter(Boolean)
+      .join(", "),
     datosPersonales.email,
-    datosPersonales.telefono,
+    datosPersonales.telefonoMovil,
+    datosPersonales.solicitaBeca &&
+      `Solicita beca${datosPersonales.tipoBeca ? ` (${datosPersonales.tipoBeca}%)` : ""}`,
   ]
     .filter(Boolean)
     .join(" · ");
 
   const descAcademicos = [
+    datosAcademicos.tipoCarreras.length > 0 &&
+      datosAcademicos.tipoCarreras.join(" / "),
     datosAcademicos.carreraElegida,
     datosAcademicos.tituloGradoObtenido &&
       `Título previo: ${datosAcademicos.tituloGradoObtenido}`,
+    datosAcademicos.tituloPosgrado &&
+      `Posgrado previo: ${datosAcademicos.tituloPosgrado}`,
     datosAcademicos.motivaciones && `Motivación declarada`,
   ]
     .filter(Boolean)

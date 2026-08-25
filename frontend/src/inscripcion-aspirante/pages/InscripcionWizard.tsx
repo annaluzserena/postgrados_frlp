@@ -13,6 +13,9 @@ import {
   type DatosAcademicos,
   DATOS_DOCUMENTOS_INICIAL,
   type DatosDocumentos,
+  type CrearLegajoRequest,
+  type Legajo,
+  type TipoDocumento,
 } from "../../shared/types/types.ts";
 
 const STEPS: Step[] = [
@@ -29,9 +32,7 @@ const STEP_TITLES: Record<string, string> = {
   confirmar: "Confirmar Inscripción",
 };
 
-// TODO: reemplazar por la URL real del backend cuando esté disponible.
-// Ej: `${import.meta.env.VITE_API_URL}/inscripciones`
-const INSCRIPCION_ENDPOINT = "/api/inscripciones";
+const LEGAJO_ENDPOINT = "/api/v1/legajos";
 
 interface InscripcionPayload {
   datosPersonales: DatosPersonales;
@@ -39,17 +40,53 @@ interface InscripcionPayload {
   datosDocumentos: DatosDocumentos;
 }
 
-async function postInscripcion(payload: InscripcionPayload) {
+// Traduce los ids internos de DOCUMENTOS_REQUERIDOS al enum TipoDocumento del backend
+const DOCUMENTO_ID_A_TIPO: Record<string, TipoDocumento> = {
+  "formulario-preinscripcion": "FORM_INSCRIPCION",
+  "partida-nacimiento": "PARTIDA",
+  "cuit-cuil": "CUIT_CUIL",
+  "titulo-grado": "TITULO_GRADO",
+  "titulo-posgrado": "TITULO_POSGRADO",
+  dni: "DNI",
+};
+
+function mapearACrearLegajoRequest(
+  payload: InscripcionPayload
+): CrearLegajoRequest {
+  return {
+    apellido: payload.datosPersonales.apellido,
+    nombre: payload.datosPersonales.nombre,
+    nacionalidad: payload.datosPersonales.nacionalidad,
+    dni: payload.datosPersonales.documento,
+    telefono_movil: payload.datosPersonales.telefonoMovil,
+    telefono_fijo: payload.datosPersonales.telefonoFijo || undefined,
+    email: payload.datosPersonales.email,
+    email_alternativo: payload.datosPersonales.emailAlternativo || undefined,
+    domicilio: payload.datosPersonales.domicilio,
+
+    titulo_grado: payload.datosAcademicos.tituloGradoObtenido,
+    titulo_posgrado: payload.datosAcademicos.tituloPosgrado || undefined,
+    como_conocio: payload.datosAcademicos.canalDifusion,
+    motivacion: payload.datosAcademicos.motivaciones,
+    tipo_carreras: payload.datosAcademicos.tipoCarreras,
+    carreras: [payload.datosAcademicos.carreraElegida],
+
+    solicita_beca: payload.datosPersonales.solicitaBeca,
+    tipo_beca: payload.datosPersonales.tipoBeca,
+  };
+}
+
+async function subirDocumento(legajoId: string, docId: string, file: File) {
+  const tipo = DOCUMENTO_ID_A_TIPO[docId];
+  if (!tipo) {
+    throw new Error(`Tipo de documento desconocido: ${docId}`);
+  }
+
   const formData = new FormData();
+  formData.append("file", file);
+  formData.append("tipo", tipo);
 
-  formData.append("datosPersonales", JSON.stringify(payload.datosPersonales));
-  formData.append("datosAcademicos", JSON.stringify(payload.datosAcademicos));
-
-  Object.entries(payload.datosDocumentos).forEach(([id, file]) => {
-    if (file) formData.append(`documentos[${id}]`, file);
-  });
-
-  const response = await fetch(INSCRIPCION_ENDPOINT, {
+  const response = await fetch(`/api/v1/legajos/${legajoId}/documentos`, {
     method: "POST",
     body: formData,
   });
@@ -57,11 +94,38 @@ async function postInscripcion(payload: InscripcionPayload) {
   if (!response.ok) {
     const body = await response.json().catch(() => null);
     throw new Error(
-      body?.message ?? "No se pudo enviar la inscripción. Intentá nuevamente."
+      body?.message ?? `No se pudo subir el documento: ${docId}`
     );
   }
 
   return response.json();
+}
+
+async function postInscripcion(payload: InscripcionPayload): Promise<Legajo> {
+  // 1. Crear el legajo con los datos de texto
+  const legajoResponse = await fetch(LEGAJO_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(mapearACrearLegajoRequest(payload)),
+  });
+
+  if (!legajoResponse.ok) {
+    const body = await legajoResponse.json().catch(() => null);
+    throw new Error(
+      body?.message ?? "No se pudo enviar la inscripción. Intentá nuevamente."
+    );
+  }
+
+  const legajo: Legajo = await legajoResponse.json();
+
+  // 2. Subir cada documento cargado, uno por uno, contra el id del legajo
+  const subidas = Object.entries(payload.datosDocumentos)
+    .filter((entry): entry is [string, File] => entry[1] !== null)
+    .map(([docId, file]) => subirDocumento(legajo.id, docId, file));
+
+  await Promise.all(subidas);
+
+  return legajo;
 }
 
 export function InscripcionWizard() {

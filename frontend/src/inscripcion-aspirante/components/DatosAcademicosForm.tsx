@@ -2,7 +2,9 @@ import { useState, type FormEvent } from "react";
 import {
   CARRERAS_POSGRADO,
   CANALES_DIFUSION,
+  TIPOS_CARRERA,
   type DatosAcademicos,
+  type TipoCarrera,
 } from "../../shared/types/types.ts";
 
 interface DatosAcademicosFormProps {
@@ -12,7 +14,9 @@ interface DatosAcademicosFormProps {
   onSaveDraft?: (data: DatosAcademicos) => void;
 }
 
-type Errors = Partial<Record<keyof DatosAcademicos, string>>;
+type Errors = Partial<Record<string, string>>;
+
+const MOTIVACION_MIN = 50;
 
 export function DatosAcademicosForm({
   initialData,
@@ -31,9 +35,26 @@ export function DatosAcademicosForm({
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
+  const toggleTipoCarrera = (tipo: TipoCarrera) => {
+    setForm((prev) => {
+      const yaSeleccionado = prev.tipoCarreras.includes(tipo);
+      if (yaSeleccionado) {
+        return { ...prev, tipoCarreras: prev.tipoCarreras.filter((t) => t !== tipo) };
+      }
+      if (prev.tipoCarreras.length >= 2) {
+        return prev; // máximo 2, ignora el click
+      }
+      return { ...prev, tipoCarreras: [...prev.tipoCarreras, tipo] };
+    });
+    setErrors((prev) => ({ ...prev, tipoCarreras: undefined }));
+  };
+
   const validate = (): boolean => {
     const nextErrors: Errors = {};
 
+    if (form.tipoCarreras.length === 0) {
+      nextErrors.tipoCarreras = "Seleccioná al menos un tipo de carrera.";
+    }
     if (!form.carreraElegida) {
       nextErrors.carreraElegida = "Seleccioná la carrera a la que aspirás.";
     }
@@ -45,6 +66,8 @@ export function DatosAcademicosForm({
     }
     if (!form.motivaciones.trim()) {
       nextErrors.motivaciones = "Contanos brevemente tus motivaciones.";
+    } else if (form.motivaciones.trim().length < MOTIVACION_MIN) {
+      nextErrors.motivaciones = `Necesitás al menos ${MOTIVACION_MIN} caracteres (llevás ${form.motivaciones.trim().length}).`;
     }
 
     setErrors(nextErrors);
@@ -64,6 +87,37 @@ export function DatosAcademicosForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6 px-5 pb-8">
+      {/* Tipo de carrera */}
+      <div className="flex flex-col gap-1.5">
+        <label>Tipo de carrera</label>
+        <p className="text-xs text-ink-muted">
+          Seleccioná hasta 2 tipos de posgrado que te interesen
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {TIPOS_CARRERA.map((tipo) => {
+            const seleccionado = form.tipoCarreras.includes(tipo);
+            return (
+              <button
+                key={tipo}
+                type="button"
+                disabled={isSubmitting}
+                onClick={() => toggleTipoCarrera(tipo)}
+                className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
+                  seleccionado
+                    ? "border-brand-500 bg-brand-50 text-brand-700"
+                    : "border-line text-ink-secondary hover:text-ink"
+                }`}
+              >
+                {tipo}
+              </button>
+            );
+          })}
+        </div>
+        {errors.tipoCarreras && (
+          <p className="text-xs font-medium text-semaforo-rojo">{errors.tipoCarreras}</p>
+        )}
+      </div>
+
       {/* Carrera elegida */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="carreraElegida">Carrera elegida (Posgrado)</label>
@@ -111,6 +165,22 @@ export function DatosAcademicosForm({
         )}
       </div>
 
+      {/* Título de posgrado (opcional) */}
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="tituloPosgrado">Título de posgrado (opcional)</label>
+        <p className="text-xs text-ink-muted">
+          Si ya contás con un título de posgrado, indicalo acá
+        </p>
+        <input
+          id="tituloPosgrado"
+          type="text"
+          value={form.tituloPosgrado ?? ""}
+          onChange={(e) => handleChange("tituloPosgrado", e.target.value)}
+          disabled={isSubmitting}
+          placeholder="Ej: Especialización en Gestión Educativa"
+        />
+      </div>
+
       {/* Canal de difusión */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="canalDifusion">
@@ -143,7 +213,7 @@ export function DatosAcademicosForm({
           Motivaciones para realizar la carrera
         </label>
         <p className="text-xs text-ink-muted">
-          Describí brevemente tus expectativas y metas profesionales
+          Describí brevemente tus expectativas y metas profesionales (mínimo {MOTIVACION_MIN} caracteres)
         </p>
         <textarea
           id="motivaciones"
@@ -153,6 +223,9 @@ export function DatosAcademicosForm({
           disabled={isSubmitting}
           placeholder="Contanos qué te motiva a realizar este posgrado..."
         />
+        <p className="text-xs text-ink-muted">
+          {form.motivaciones.trim().length} / {MOTIVACION_MIN} caracteres mínimos
+        </p>
         {errors.motivaciones && (
           <p className="text-xs font-medium text-semaforo-rojo">
             {errors.motivaciones}

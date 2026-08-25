@@ -155,6 +155,33 @@ export interface DatosPersonales {
   telefonoFijo: string;
   email: string;
   emailAlternativo: string;
+  domicilio: {
+    direccion: string;
+    ciudad: string;
+    provincia: string;
+    pais: string;
+  };
+  solicitaBeca: boolean;
+  tipoBeca?: TipoBeca;
+}
+
+export interface DatosPersonales {
+  apellido: string;
+  nombre: string;
+  nacionalidad: string;
+  documento: string;
+  telefonoMovil: string;
+  telefonoFijo: string;
+  email: string;
+  emailAlternativo: string;
+  domicilio: {
+    direccion: string;
+    ciudad: string;
+    provincia: string;
+    pais: string;
+  };
+  solicitaBeca: boolean;
+  tipoBeca?: TipoBeca;
 }
 
 export const DATOS_PERSONALES_INICIAL: DatosPersonales = {
@@ -166,21 +193,40 @@ export const DATOS_PERSONALES_INICIAL: DatosPersonales = {
   telefonoFijo: "",
   email: "",
   emailAlternativo: "",
+  domicilio: {
+    direccion: "",
+    ciudad: "",
+    provincia: "",
+    pais: "Argentina",
+  },
+  solicitaBeca: false,
+  tipoBeca: undefined,
 };
 
+
 export interface DatosAcademicos {
+  tipoCarreras: TipoCarrera[]; // máximo 2
   carreraElegida: string;
   tituloGradoObtenido: string;
+  tituloPosgrado?: string;
   canalDifusion: string;
   motivaciones: string;
 }
 
 export const DATOS_ACADEMICOS_INICIAL: DatosAcademicos = {
+  tipoCarreras: [],
   carreraElegida: "",
   tituloGradoObtenido: "",
+  tituloPosgrado: "",
   canalDifusion: "",
   motivaciones: "",
 };
+
+export const TIPOS_CARRERA: TipoCarrera[] = [
+  "Especializacion",
+  "Maestria",
+  "Doctorado",
+];
 
 //Datos academicos que solicitan para inscripcion de posgrado
 export const CARRERAS_POSGRADO = [

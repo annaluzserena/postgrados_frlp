@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Button } from "@/shared/components/Button";
-import type { DatosPersonales } from "../../shared/types/types.ts";
+import type { DatosPersonales, TipoBeca } from "../../shared/types/types.ts";
 
 interface DatosPersonalesFormProps {
   initialData: DatosPersonales;
@@ -8,12 +8,12 @@ interface DatosPersonalesFormProps {
   onNext: (data: DatosPersonales) => void;
 }
 
-type Errors = Partial<Record<keyof DatosPersonales, string>>;
+type Errors = Partial<Record<string, string>>;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const FIELDS: Array<{
-  field: keyof DatosPersonales;
+  field: keyof Omit<DatosPersonales, "domicilio" | "solicitaBeca" | "tipoBeca">;
   label: string;
   placeholder: string;
   type?: string;
@@ -46,6 +46,18 @@ const FIELDS: Array<{
   },
 ];
 
+const DOMICILIO_FIELDS: Array<{
+  field: keyof DatosPersonales["domicilio"];
+  label: string;
+  placeholder: string;
+  required?: boolean;
+}> = [
+  { field: "direccion", label: "Dirección", placeholder: "Calle 48 N° 1250", required: true },
+  { field: "ciudad", label: "Ciudad", placeholder: "La Plata", required: true },
+  { field: "provincia", label: "Provincia", placeholder: "Buenos Aires", required: true },
+  { field: "pais", label: "País", placeholder: "Argentina", required: true },
+];
+
 export function DatosPersonalesForm({
   initialData,
   isSubmitting,
@@ -55,9 +67,30 @@ export function DatosPersonalesForm({
   const [errors, setErrors] = useState<Errors>({});
 
   const handleChange =
-    (field: keyof DatosPersonales) => (e: ChangeEvent<HTMLInputElement>) => {
+    (field: keyof Omit<DatosPersonales, "domicilio" | "solicitaBeca" | "tipoBeca">) =>
+    (e: ChangeEvent<HTMLInputElement>) => {
       setData((prev) => ({ ...prev, [field]: e.target.value }));
     };
+
+  const handleDomicilioChange =
+    (field: keyof DatosPersonales["domicilio"]) => (e: ChangeEvent<HTMLInputElement>) => {
+      setData((prev) => ({
+        ...prev,
+        domicilio: { ...prev.domicilio, [field]: e.target.value },
+      }));
+    };
+
+  const handleBecaToggle = (e: ChangeEvent<HTMLInputElement>) => {
+    setData((prev) => ({
+      ...prev,
+      solicitaBeca: e.target.checked,
+      tipoBeca: e.target.checked ? prev.tipoBeca : undefined,
+    }));
+  };
+
+  const handleTipoBecaChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setData((prev) => ({ ...prev, tipoBeca: e.target.value as TipoBeca }));
+  };
 
   const validate = (): Errors => {
     const next: Errors = {};
@@ -73,6 +106,16 @@ export function DatosPersonalesForm({
     if (data.emailAlternativo && !EMAIL_RE.test(data.emailAlternativo)) {
       next.emailAlternativo = "El correo alternativo no tiene un formato válido.";
     }
+
+    if (!data.domicilio.direccion.trim()) next.direccion = "Ingresá la dirección.";
+    if (!data.domicilio.ciudad.trim()) next.ciudad = "Ingresá la ciudad.";
+    if (!data.domicilio.provincia.trim()) next.provincia = "Ingresá la provincia.";
+    if (!data.domicilio.pais.trim()) next.pais = "Ingresá el país.";
+
+    if (data.solicitaBeca && !data.tipoBeca) {
+      next.tipoBeca = "Seleccioná el tipo de beca.";
+    }
+
     return next;
   };
 
@@ -111,6 +154,61 @@ export function DatosPersonalesForm({
           )}
         </div>
       ))}
+
+      <div className="mt-2 flex flex-col gap-4 border-t border-line pt-5">
+        <h2 className="text-sm font-semibold text-ink">Domicilio</h2>
+
+        {DOMICILIO_FIELDS.map(({ field, label, placeholder, required }) => (
+          <div key={field} className="flex flex-col gap-1.5">
+            <label htmlFor={`domicilio-${field}`}>
+              {label}
+              {required && <span className="ml-0.5 text-semaforo-rojo">*</span>}
+            </label>
+            <input
+              id={`domicilio-${field}`}
+              name={field}
+              type="text"
+              value={data.domicilio[field]}
+              onChange={handleDomicilioChange(field)}
+              placeholder={placeholder}
+              aria-invalid={Boolean(errors[field])}
+              aria-describedby={errors[field] ? `${field}-error` : undefined}
+              className={errors[field] ? "border-semaforo-rojo focus:ring-semaforo-rojo" : ""}
+            />
+            {errors[field] && (
+              <p id={`${field}-error`} className="text-xs font-medium text-semaforo-rojo">
+                {errors[field]}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-2 flex flex-col gap-3 border-t border-line pt-5">
+        <label className="flex items-center gap-2 text-sm font-medium text-ink-secondary">
+          <input
+            type="checkbox"
+            checked={data.solicitaBeca}
+            onChange={handleBecaToggle}
+            className="h-4 w-4 rounded border-line"
+          />
+          Solicito beca
+        </label>
+
+        {data.solicitaBeca && (
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="tipoBeca">Tipo de beca</label>
+            <select id="tipoBeca" value={data.tipoBeca ?? ""} onChange={handleTipoBecaChange}>
+              <option value="">Seleccioná una opción</option>
+              <option value="30">30%</option>
+              <option value="100">100%</option>
+            </select>
+            {errors.tipoBeca && (
+              <p className="text-xs font-medium text-semaforo-rojo">{errors.tipoBeca}</p>
+            )}
+          </div>
+        )}
+      </div>
 
       <Button type="submit" variant="primary" isLoading={isSubmitting} className="mt-2 w-full">
         Continuar
