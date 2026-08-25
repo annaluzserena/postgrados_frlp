@@ -4,11 +4,23 @@ import type { ComponentType, SVGProps } from "react";
 export type Rol = "aspirante" | "docente" | "admin" | "coordinador" | "cpr" | "estudiante";
 
 export interface User {
-  id: string;
   nombre: string;
   rol: Rol;
   email: string;
+  password_hash: string;
+  password_plano: string;
+  activo: boolean;
 }
+
+export const roleHome: Record<User["rol"], string> = {
+  coordinador: "/panel",
+  docente: "/panel",
+  cpr: "/panel",
+  aspirante: "/inscripcion",
+  admin: "/panel",
+  estudiante: "/welcome"
+};
+
 
 export interface MenuItem {
   id: string;

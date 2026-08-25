@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Eye, Download, Search } from "lucide-react";
+import { Eye, Download, Search, ArrowLeft } from "lucide-react";
 import type { EstadoLegajo, TipoCarrera } from "@/shared/types/types";
 import { useLegajos } from "../hooks/useLegajos";
 import { useCohortes } from "../hooks/useCohortes";
 import { Spinner } from "@/shared/components/Spinner";
 import { BadgeEstado } from "./BadgeEstado";
 import { Button } from "@/shared/components/Button";
+import DetalleLegajo from "./DetalleLegajo";
 
 const limit = 10;
 
@@ -19,13 +20,21 @@ function ListaInscriptos() {
     undefined,
   );
   const [page, setPage] = useState(1);
+  const [inscripto, setInscripto] = useState<string | undefined>(undefined);
   const {
     data: legajos,
     isLoading: isLoadingLegajos,
     isError: isErrorLegajos,
     error: errorLegajos,
     isPlaceholderData,
-  } = useLegajos({ estado, solo_con_beca, tipo_carrera, cohorte_id, page, limit });
+  } = useLegajos({
+    estado,
+    solo_con_beca,
+    tipo_carrera,
+    cohorte_id,
+    page,
+    limit,
+  });
   const {
     data: cohortes,
     isLoading: isLoadingCohortes,
@@ -54,6 +63,17 @@ function ListaInscriptos() {
           `No se pudieron cargar los cohortes: ${(errorCohortes as Error).message}`}
       </div>
     );
+  }
+
+  if (inscripto) {
+    return (
+    <>
+      <Button icon={ArrowLeft} variant="ghost" onClick={() => setInscripto(undefined)}>
+        Volver
+      </Button>
+      <DetalleLegajo id={inscripto} />
+    </>
+    )
   }
 
   const legajosFiltrados = legajos?.legajos.filter(
@@ -145,7 +165,9 @@ function ListaInscriptos() {
             id="tipo_carrera"
             value={tipo_carrera ?? ""}
             onChange={(e) => {
-              setTipoCarrera((e.target.value || undefined) as TipoCarrera | undefined);
+              setTipoCarrera(
+                (e.target.value || undefined) as TipoCarrera | undefined,
+              );
               setPage(1);
             }}
             className="!py-1.5 text-xs"
@@ -159,7 +181,9 @@ function ListaInscriptos() {
           <select
             value={estado ?? ""}
             onChange={(e) => {
-              setEstado((e.target.value || undefined) as EstadoLegajo | undefined);
+              setEstado(
+                (e.target.value || undefined) as EstadoLegajo | undefined,
+              );
               setPage(1);
             }}
             className="!py-1.5 text-xs"
@@ -203,7 +227,10 @@ function ListaInscriptos() {
             </thead>
             <tbody className="divide-y divide-line">
               {legajosFiltrados?.map((legajo) => (
-                <tr key={legajo.id} className="transition-colors hover:bg-paper-elevated/60">
+                <tr
+                  key={legajo.id}
+                  className="transition-colors hover:bg-paper-elevated/60"
+                >
                   <td className="px-4 py-3 font-medium text-ink">
                     {legajo.apellido}, {legajo.nombre}
                   </td>
@@ -218,7 +245,11 @@ function ListaInscriptos() {
                     {legajo.solicita_beca ? `${legajo.tipo_beca}%` : "—"}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Button icon={Eye} variant="ghost">
+                    <Button
+                      icon={Eye}
+                      variant="ghost"
+                      onClick={() => setInscripto(legajo.id)}
+                    >
                       Ver legajo
                     </Button>
                   </td>
