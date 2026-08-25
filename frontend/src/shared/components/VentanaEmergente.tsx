@@ -1,5 +1,4 @@
 import { X } from 'lucide-react';
-import './VentanaEmergente.css';
 
 interface VentanaEmergenteProps {
   isOpen: boolean;
@@ -12,15 +11,25 @@ export default function VentanaEmergente({ isOpen, onClose, title, children }: V
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>{title}</h2>
-          <button className="modal-close" onClick={onClose}>
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-sm rounded-2xl border border-line bg-paper-elevated p-6 shadow-card"
+      >
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold text-ink">{title}</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-ink-muted transition-colors hover:text-ink"
+          >
             <X size={20} />
           </button>
         </div>
-        {children}
+        <div className="mt-4">{children}</div>
       </div>
     </div>
   );

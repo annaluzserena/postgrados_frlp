@@ -1,7 +1,9 @@
-import { GraduationCap, Sun, Moon } from "lucide-react";
+import { Sun, Moon } from "lucide-react";
 import type { MenuItem, User } from "@/shared/types/types";
 import { Button } from "./Button";
 import { useTheme } from "@/shared/context/useTheme";
+import LogoFenix from "../../assets/LogoFenix.png";
+import UtnLogo from "../../assets/UtnLogo.png"; 
 
 export interface SidebarProps {
   user: User;
@@ -22,18 +24,33 @@ export function Sidebar({ user, items, currentPath, onNavigate }: SidebarProps) 
       className="flex h-full w-64 shrink-0 flex-col border-r border-line bg-paper-surface text-neutral-600 transition-colors duration-300 dark:border-white/10 dark:bg-sidebar dark:text-slate-300"
       aria-label="Menú principal"
     >
-      {/* Logo */}
-      <div className="flex items-center gap-3 border-b border-line px-5 py-5 dark:border-white/10">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 dark:bg-sidebar-box">
-          <GraduationCap className="h-5 w-5 text-brand-600 dark:text-white" aria-hidden="true" />
+      {/* Logos */}
+      <div className="flex items-center justify-between border-b border-line px-4 py-4 dark:border-white/10">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-brand-50 dark:bg-sidebar-box">
+            <img
+              src={LogoFenix}
+              alt="Logo Fénix"
+              className="h-full w-full object-contain p-1"
+            />
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold leading-tight text-ink dark:text-white">
+              FENIX POSGRADO
+            </p>
+            <p className="truncate text-[10px] leading-tight text-ink-muted dark:text-slate-400">
+              SISTEMA ACADEMICO
+            </p>
+          </div>
         </div>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-bold leading-tight text-ink dark:text-white">
-            FENIX POSGRADO
-          </p>
-          <p className="truncate text-[11px] leading-tight text-ink-muted dark:text-slate-400">
-            SISTEMA ACADEMICO - UTN FRLP
-          </p>
+
+        {/* Logo UTN a la derecha */}
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center">
+          <img
+            src={UtnLogo}
+            alt="Logo UTN"
+            className="h-full w-full object-contain"
+          />
         </div>
       </div>
 
