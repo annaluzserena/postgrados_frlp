@@ -34,29 +34,25 @@ function App() {
   ];
 
   return (
-    <div className="flex h-screen w-full bg-paper-surface overflow-hidden">
-      
-      {/* Sidebar compartido con sus props requeridas */}
-      <Sidebar 
-        user={currentUser}
-        items={menuItems}
-        currentPath={currentPath}
-        onNavigate={(href) => setCurrentPath(href)}
-      />
-
-      {/* Área principal derecha con estilos de Tailwind en común */}
-      <main className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-zinc-900">
-        {currentPath === '/legajos' ? (
-          <LegajoPage />
-        ) : (
-          <div className="text-ink dark:text-white p-4">
-            <h2 className="text-xl font-bold">Bienvenido al sistema</h2>
-            <p>Selecciona una opción en el menú lateral.</p>
-          </div>
-        )}
-      </main>
-    </div>
+    <LoginScreen />
   );
 }
 
+
+import NotificacionesScreen from './AlertasNotificaciones/pages/Alerta';
+
+function App() {
+  return (
+    <NotificacionesScreen />
+  );
+}
+export default App;*/
+
+import  Dashboard from './dashboard-coordinador/pages/Dashboard';
+
+function App() {  
+   return (
+    <Dashboard />
+  );
+}
 export default App;
