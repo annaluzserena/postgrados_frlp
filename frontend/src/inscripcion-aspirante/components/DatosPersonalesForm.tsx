@@ -13,7 +13,7 @@ type Errors = Partial<Record<string, string>>;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const FIELDS: Array<{
-  field: keyof Omit<DatosPersonales, "domicilio" | "solicitaBeca" | "tipoBeca">;
+  field: keyof Omit<DatosPersonales, "domicilio" | "solicitaBeca" | "tipoBeca" | "comprobanteBeca">;
   label: string;
   placeholder: string;
   type?: string;
@@ -22,7 +22,7 @@ const FIELDS: Array<{
   { field: "apellido", label: "Apellido", placeholder: "Pérez", required: true },
   { field: "nombre", label: "Nombre", placeholder: "María Laura", required: true },
   { field: "nacionalidad", label: "Nacionalidad", placeholder: "Argentina", required: true },
-  { field: "documento", label: "DNI o Pasaporte", placeholder: "38.451.982", required: true },
+  { field: "documento", label: "DNI o Pasaporte", placeholder: "38451982 (sin puntos)", required: true },
   {
     field: "telefonoMovil",
     label: "Teléfono móvil",
@@ -67,10 +67,16 @@ export function DatosPersonalesForm({
   const [errors, setErrors] = useState<Errors>({});
 
   const handleChange =
-    (field: keyof Omit<DatosPersonales, "domicilio" | "solicitaBeca" | "tipoBeca">) =>
+    (field: keyof Omit<DatosPersonales, "domicilio" | "solicitaBeca" | "tipoBeca" | "comprobanteBeca">) =>
     (e: ChangeEvent<HTMLInputElement>) => {
       setData((prev) => ({ ...prev, [field]: e.target.value }));
     };
+
+  const handleComprobanteChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? undefined;
+    setData((prev) => ({ ...prev, comprobanteBeca: file }));
+    setErrors((prev) => ({ ...prev, comprobanteBeca: undefined }));
+  };
 
   const handleDomicilioChange =
     (field: keyof DatosPersonales["domicilio"]) => (e: ChangeEvent<HTMLInputElement>) => {
@@ -85,6 +91,7 @@ export function DatosPersonalesForm({
       ...prev,
       solicitaBeca: e.target.checked,
       tipoBeca: e.target.checked ? prev.tipoBeca : undefined,
+      comprobanteBeca: e.target.checked ? prev.comprobanteBeca : undefined,
     }));
   };
 
@@ -114,6 +121,15 @@ export function DatosPersonalesForm({
 
     if (data.solicitaBeca && !data.tipoBeca) {
       next.tipoBeca = "Seleccioná el tipo de beca.";
+    }
+    if (data.solicitaBeca && !data.comprobanteBeca) {
+      next.comprobanteBeca = "Adjuntá el formulario en PDF para formalizar la solicitud.";
+    } else if (
+      data.solicitaBeca &&
+      data.comprobanteBeca &&
+      data.comprobanteBeca.type !== "application/pdf"
+    ) {
+      next.comprobanteBeca = "El archivo debe estar en formato PDF.";
     }
 
     return next;
@@ -205,6 +221,31 @@ export function DatosPersonalesForm({
             </select>
             {errors.tipoBeca && (
               <p className="text-xs font-medium text-semaforo-rojo">{errors.tipoBeca}</p>
+            )}
+
+            <label htmlFor="comprobanteBeca" className="mt-3">
+              Formulario de solicitud de beca (PDF)
+              <span className="ml-0.5 text-semaforo-rojo">*</span>
+            </label>
+            <input
+              id="comprobanteBeca"
+              name="comprobanteBeca"
+              type="file"
+              accept="application/pdf"
+              onChange={handleComprobanteChange}
+              aria-invalid={Boolean(errors.comprobanteBeca)}
+              aria-describedby={errors.comprobanteBeca ? "comprobanteBeca-error" : undefined}
+              className={errors.comprobanteBeca ? "border-semaforo-rojo focus:ring-semaforo-rojo" : ""}
+            />
+            {data.comprobanteBeca && (
+              <p className="text-xs text-ink-muted">
+                Archivo seleccionado: {data.comprobanteBeca.name}
+              </p>
+            )}
+            {errors.comprobanteBeca && (
+              <p id="comprobanteBeca-error" className="text-xs font-medium text-semaforo-rojo">
+                {errors.comprobanteBeca}
+              </p>
             )}
           </div>
         )}
