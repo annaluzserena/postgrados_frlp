@@ -76,12 +76,7 @@ function mapearACrearLegajoRequest(
   };
 }
 
-async function subirDocumento(legajoId: string, docId: string, file: File) {
-  const tipo = DOCUMENTO_ID_A_TIPO[docId];
-  if (!tipo) {
-    throw new Error(`Tipo de documento desconocido: ${docId}`);
-  }
-
+async function subirDocumentoConTipo(legajoId: string, tipo: TipoDocumento, file: File) {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("tipo", tipo);
@@ -94,11 +89,19 @@ async function subirDocumento(legajoId: string, docId: string, file: File) {
   if (!response.ok) {
     const body = await response.json().catch(() => null);
     throw new Error(
-      body?.message ?? `No se pudo subir el documento: ${docId}`
+      body?.message ?? `No se pudo subir el documento (${tipo}).`
     );
   }
 
   return response.json();
+}
+
+async function subirDocumento(legajoId: string, docId: string, file: File) {
+  const tipo = DOCUMENTO_ID_A_TIPO[docId];
+  if (!tipo) {
+    throw new Error(`Tipo de documento desconocido: ${docId}`);
+  }
+  return subirDocumentoConTipo(legajoId, tipo, file);
 }
 
 async function postInscripcion(payload: InscripcionPayload): Promise<Legajo> {
@@ -122,6 +125,17 @@ async function postInscripcion(payload: InscripcionPayload): Promise<Legajo> {
   const subidas = Object.entries(payload.datosDocumentos)
     .filter((entry): entry is [string, File] => entry[1] !== null)
     .map(([docId, file]) => subirDocumento(legajo.id, docId, file));
+
+  // 3. Si solicitó beca, subir el comprobante como documento FORM_BECA
+  if (payload.datosPersonales.solicitaBeca && payload.datosPersonales.comprobanteBeca) {
+    subidas.push(
+      subirDocumentoConTipo(
+        legajo.id,
+        "FORM_BECA",
+        payload.datosPersonales.comprobanteBeca
+      )
+    );
+  }
 
   await Promise.all(subidas);
 

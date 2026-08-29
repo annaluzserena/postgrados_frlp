@@ -17,7 +17,7 @@ function EstadoBadge({
   archivo,
   opcional,
 }: {
-  archivo: File | null;
+  archivo: File | undefined;
   opcional?: boolean;
 }) {
   if (archivo) {
@@ -48,8 +48,8 @@ function DocumentoRow({
   disabled,
 }: {
   documento: DocumentoRequerido;
-  archivo: File | null;
-  onSelectFile: (file: File | null) => void;
+  archivo: File | undefined;
+  onSelectFile: (file: File | undefined) => void;
   disabled?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -59,7 +59,7 @@ function DocumentoRow({
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] ?? null;
+    const file = e.target.files?.[0] ?? undefined;
     onSelectFile(file);
   };
 
@@ -102,17 +102,21 @@ export function DatosDocumentosForm({
   onSaveDraft,
 }: DatosDocumentosFormProps) {
   const [documentos, setDocumentos] = useState<DatosDocumentos>(initialData);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | undefined>(undefined);
 
-  const handleSelectFile = (id: string, file: File | null) => {
+  const handleSelectFile = (id: string, file: File | undefined) => {
     setDocumentos((prev) => ({ ...prev, [id]: file }));
-    setError(null);
+    setError(undefined);
   };
 
   const faltantes = DOCUMENTOS_REQUERIDOS.filter(
     (doc) => !doc.opcional && !documentos[doc.id]
   );
-
+  if (faltantes.length > 0) {
+    console.log("Faltan documentos:", faltantes);
+    return;
+  }
+  
 const handleSubmit = () => {
   onNext(documentos);
 };
