@@ -13,6 +13,8 @@ interface DatosDocumentosFormProps {
   onSaveDraft?: (data: DatosDocumentos) => void;
 }
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
 function EstadoBadge({
   archivo,
   opcional,
@@ -45,11 +47,13 @@ function DocumentoRow({
   documento,
   archivo,
   onSelectFile,
+  onError,
   disabled,
 }: {
   documento: DocumentoRequerido;
   archivo: File | null;
   onSelectFile: (file: File | null) => void;
+  onError: (msg: string | null) => void;
   disabled?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -60,6 +64,28 @@ function DocumentoRow({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
+
+    if (!file) {
+      onSelectFile(null);
+      onError(null);
+      return;
+    }
+
+    if (file.type !== "application/pdf") {
+      onError(`El archivo "${file.name}" no es un PDF válido. Solo se permiten archivos PDF.`);
+      onSelectFile(null);
+      if (e.target) e.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      onError(`El archivo "${file.name}" supera el límite máximo de 5MB.`);
+      onSelectFile(null);
+      if (e.target) e.target.value = "";
+      return;
+    }
+
+    onError(null);
     onSelectFile(file);
   };
 
@@ -87,7 +113,7 @@ function DocumentoRow({
       <input
         ref={inputRef}
         type="file"
-        accept=".pdf,.jpg,.jpeg,.png"
+        accept=".pdf"
         className="hidden"
         onChange={handleChange}
       />
@@ -106,7 +132,7 @@ export function DatosDocumentosForm({
 
   const handleSelectFile = (id: string, file: File | null) => {
     setDocumentos((prev) => ({ ...prev, [id]: file }));
-    setError(null);
+    // setError(null);
   };
 
   const faltantes = DOCUMENTOS_REQUERIDOS.filter(
@@ -135,6 +161,7 @@ const handleSubmit = () => {
             archivo={documentos[documento.id]}
             disabled={isSubmitting}
             onSelectFile={(file) => handleSelectFile(documento.id, file)}
+            onError={setError}
           />
         ))}
 
