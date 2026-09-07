@@ -62,7 +62,7 @@ function DocumentoRow({
     if (!disabled) inputRef.current?.click();
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
 
     if (!file) {
@@ -85,8 +85,25 @@ function DocumentoRow({
       return;
     }
 
+    const extension = file.name.split(".").pop() || "pdf";
+    const uuidName = `${crypto.randomUUID()}.${extension}`;
+    const renamedFile = new File([file], uuidName, { type: file.type });
+
+    try {
+      const buffer = await file.arrayBuffer();
+      const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const checksum = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+
+      (renamedFile as any).checksum = checksum;
+      
+      console.log(`Archivo: ${uuidName} | SHA-256: ${checksum}`);
+    } catch (err) {
+      console.error("Error al calcular el checksum SHA-256:", err);
+    }
+
     onError(null);
-    onSelectFile(file);
+    onSelectFile(renamedFile);
   };
 
   return (
