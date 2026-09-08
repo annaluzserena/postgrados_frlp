@@ -1,19 +1,20 @@
-import { useState, type SyntheticEvent } from 'react';
-import { User, Lock, Mail } from 'lucide-react';
-import Header from '../components/Header';
-import Input from '../components/Input';
-import Checkbox from '../components/Checkbox';
-import {Button} from '../../shared/components/Button';
-import VentanaEmergente from '../../shared/components/VentanaEmergente';
-import LogoFenix from '../../assets/LogoFenix.png';
-import UtnLogo from '../../assets/UtnLogo.png';
+import { useState, type SyntheticEvent } from "react";
+import { Link } from "react-router-dom";
+import { User, Lock, Mail } from "lucide-react";
+import Header from "../components/Header";
+import Input from "../components/Input";
+import Checkbox from "../components/Checkbox";
+import { Button } from "../../shared/components/Button";
+import VentanaEmergente from "../../shared/components/VentanaEmergente";
+import LogoFenix from "../../assets/LogoFenix.png";
+import UtnLogo from "../../assets/UtnLogo.png";
 
 export default function LoginScreen() {
-  const [usuario, setUsuario] = useState('');
-  const [contrasena, setContrasena] = useState('');
+  const [usuario, setUsuario] = useState("");
+  const [contrasena, setContrasena] = useState("");
   const [recordarme, setRecordarme] = useState(false);
   const [showForgotModal, setShowForgotModal] = useState(false);
-  const [recoveryEmail, setRecoveryEmail] = useState('');
+  const [recoveryEmail, setRecoveryEmail] = useState("");
 
   const handleSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -44,9 +45,12 @@ export default function LoginScreen() {
 
       {/* Panel derecho: sin cambios respecto a lo que ya tenías */}
       <div className="flex w-full flex-col md:w-1/2">
-        <Header onBack={() => console.log('volver')} hideLogoOnDesktop />
+        <Header onBack={() => console.log("volver")} hideLogoOnDesktop />
 
-        <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4 px-6 pb-8 pt-8">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-1 flex-col gap-4 px-6 pb-8 pt-8"
+        >
           <Input
             icon={<User size={18} />}
             placeholder="Usuario"
@@ -61,8 +65,9 @@ export default function LoginScreen() {
             value={contrasena}
             onChange={(e) => setContrasena(e.target.value)}
           />
-
-          <Button type="submit">Ingresar</Button>
+          <Link to="/dashboard" className="text-center" >
+            <Button type="submit">Ingresar</Button>
+          </Link>
 
           <a
             href="#"
@@ -99,7 +104,7 @@ export default function LoginScreen() {
             />
             <Button
               onClick={() => {
-                console.log('recuperar contraseña para:', recoveryEmail);
+                console.log("recuperar contraseña para:", recoveryEmail);
                 setShowForgotModal(false);
               }}
             >
