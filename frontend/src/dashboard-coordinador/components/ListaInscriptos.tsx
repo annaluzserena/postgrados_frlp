@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Eye, Download, Search, ArrowLeft } from "lucide-react";
+import * as XLSX from "xlsx-js-style";
 import type { EstadoLegajo, TipoCarrera } from "@/shared/types/types";
 import { useLegajos } from "../hooks/useLegajos";
 import { useCohortes } from "../hooks/useCohortes";
+import { api } from "@/shared/api/client";
 import { Spinner } from "@/shared/components/Spinner";
 import { BadgeEstado } from "./BadgeEstado";
 import { Button } from "@/shared/components/Button";
@@ -21,6 +23,7 @@ function ListaInscriptos() {
   );
   const [page, setPage] = useState(1);
   const [inscripto, setInscripto] = useState<string | undefined>(undefined);
+  const [isExporting, setIsExporting] = useState(false);
   const {
     data: legajos,
     isLoading: isLoadingLegajos,
@@ -42,6 +45,84 @@ function ListaInscriptos() {
     error: errorCohortes,
   } = useCohortes();
   const totalPages = legajos?.totalPages ?? 1;
+
+  
+  const handleExportExcel = async () => {
+    try {
+      setIsExporting(true);
+      
+      const params = new URLSearchParams();
+      if (estado) params.set("estado", estado);
+      if (cohorte_id) params.set("cohorte_id", cohorte_id);
+      if (tipo_carrera) params.set("tipo_carrera", tipo_carrera);
+      if (solo_con_beca !== undefined) params.set("solo_con_beca", String(solo_con_beca));
+      params.set("limit", "1000");
+
+      const response = await api.get<any>(`/legajos?${params.toString()}`);
+      const todosLosLegajos = response.legajos || [];
+
+      const filtradosParaExportar = todosLosLegajos.filter(
+        (legajo: any) =>
+          (legajo.apellido + legajo.nombre)
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .includes(
+              nombre
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+            ) && legajo.dni.includes(dni)
+      );
+
+      const dataExcel = filtradosParaExportar.map((l: any) => ({
+        "Apellido y Nombre": `${l.apellido}, ${l.nombre}`,
+        "DNI": l.dni,
+        "Carrera": l.tipo_carrera ?? "—",
+        "Estado": l.estado,
+        "Beca": l.solicita_beca ? `${l.tipo_beca}%` : "No",
+        "Email": l.email || "—",
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(dataExcel);
+
+      const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1");
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const address = XLSX.utils.encode_cell({ r: 0, c: C });
+        if (!worksheet[address]) continue;
+        worksheet[address].s = {
+          font: { bold: true }
+        };
+      }
+
+      worksheet["!autofilter"] = { ref: XLSX.utils.encode_range(range) };
+
+      worksheet["!cols"] = [
+        { wch: 30 }, // Apellido y Nombre
+        { wch: 15 }, // DNI
+        { wch: 20 }, // Carrera
+        { wch: 15 }, // Estado
+        { wch: 12 }, // Beca
+        { wch: 25 }, // Email
+      ];
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Inscriptos");
+
+      const cohorteSeleccionada = cohortes?.find((c) => c.id === cohorte_id);
+      const nombreCohorte = cohorteSeleccionada 
+        ? cohorteSeleccionada.nombre.toLowerCase().replace(/[^a-z0-9]/g, "") 
+        : "general";
+      const fechaActual = new Date().toISOString().split("T")[0];
+      const fileName = `inscriptos-${nombreCohorte}-${fechaActual}.xlsx`;
+
+      XLSX.writeFile(workbook, fileName);
+    } catch (err) {
+      console.error("Error al exportar a Excel:", err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   if (isLoadingLegajos || isLoadingCohortes) {
     return (
@@ -153,8 +234,8 @@ function ListaInscriptos() {
               className="sm:w-44"
             />
           </div>
-          <Button icon={Download} variant="outline">
-            Exportar
+          <Button icon={Download} variant="outline" onClick={handleExportExcel} disabled={isExporting}>
+            {isExporting ? "Exportando..." : "Exportar"}
           </Button>
         </div>
 
