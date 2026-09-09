@@ -2,13 +2,40 @@ import { useLegajo } from "../hooks/useLegajos";
 import { useDocumentos } from "../hooks/useDocumentos";
 import { Spinner } from "@/shared/components/Spinner";
 import { Button } from "@/shared/components/Button";
-import { Download } from "lucide-react";
+import { Download, Eye } from "lucide-react";
 import { Workflow } from "./Workflow";
 
 export default function DetalleLegajo({ id }: { id: string }) {
   const { data: legajo, isLoading: isLoadingLegajo, isError: isErrorLegajo, error: errorLegajo } = useLegajo(id);
   const { data: documentos, isLoading: isLoadingDocumentos, isError: isErrorDocumentos, error: errorDocumentos } = useDocumentos(id);
   const iniciales = `${legajo?.nombre[0] || ""}${legajo?.apellido[0] || ""}`.toUpperCase();
+
+  const handlePreviewPDF = (urlOrBase64: string) => {
+    if (!urlOrBase64) return;
+
+    let targetUrl = urlOrBase64;
+
+    if (urlOrBase64.startsWith("data:application/pdf;base64,")) {
+      try {
+        const base64Data = urlOrBase64.split(",")[1];
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "application/pdf" });
+        targetUrl = URL.createObjectURL(blob);
+
+        setTimeout(() => URL.revokeObjectURL(targetUrl), 60000);
+      } catch (err) {
+        console.error("Error al procesar el PDF para vista previa:", err);
+        return;
+      }
+    }
+
+    window.open(targetUrl, "_blank");
+  };
 
   if (isLoadingLegajo || isLoadingDocumentos) {
     return (
@@ -112,6 +139,36 @@ export default function DetalleLegajo({ id }: { id: string }) {
         <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Motivación</div>
         <p className="text-sm text-ink italic">"{legajo?.motivacion}"</p>
       </div>
+
+      {/* Sección de Documentos y Vista Previa */}
+      <div className="rounded-xl border border-line bg-paper overflow-hidden">
+        <div className="border-b border-line px-4 py-3 text-sm font-semibold text-ink">
+          Documentos adjuntos
+        </div>
+        {documentos && documentos.length > 0 ? (
+          documentos.map((doc: any) => (
+            <div key={doc.id || doc.nombre_original} className="flex items-center justify-between border-b border-line px-4 py-3.5 last:border-b-0">
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-ink">{doc.nombre_original || doc.tipo || "Documento"}</span>
+                {doc.checksum && (
+                  <span className="text-[10px] font-mono text-ink-muted">SHA-256: {doc.checksum.substring(0, 16)}...</span>
+                )}
+              </div>
+              <Button
+                type="button"
+                icon={Eye}
+                variant="outline"
+                onClick={() => handlePreviewPDF(doc.url || doc.fileUrl)}
+              >
+                Vista previa
+              </Button>
+            </div>
+          ))
+        ) : (
+          <div className="p-4 text-sm text-ink-muted">No hay documentos registrados para este legajo.</div>
+        )}
+      </div>
+      
       {legajo && <Workflow legajo={legajo}/>}
     </div>
   );

@@ -72,6 +72,7 @@ export const documentosFixture: Documento[] = legajosFixture.flatMap((legajo) =>
     nombre_original: `${NOMBRE_ARCHIVO[tipo]}_${legajo.apellido.toLowerCase().replace(/\s+/g, "_")}.pdf`,
     tamanio_bytes: tamanioAleatorioBytes(),
     fecha_subida: fechaSubidaAleatoria(legajo.fecha_inscripcion),
+    url: "data:application/pdf;base64,JVBERi0xLjMKJcTl8uXrp/Og0M0KMyAwIG9iago8PC9MZW5ndGggNCAwIFI+PnN0cmVhbQpCVC9GMSAxMiBUZiAxMDAgNzAwIFRkIChEb2N1bWVudG8gZGUgUHJ1ZWJhIFVTQ09SRTAwMykgVGoFVCBlbmRzdHJlYW0KZW5kb2JqCjQgMCBvYmoKMzQAZW5kb2JqCjEgMCBvYmoKPDwvVHlwZS9QYWdlcy9LaWRzIFsyIDAgUl0vQ291bnQgMS9NZWRpYUJveFswIDAgNTk1IDg0Ml0+PmVuZG9iagoyIDAgb2JqCjw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAxIDAgUj4+PmVuZG9iagp4cmVmCjAgNQowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAyMDEgMDAwMDAgbiAKMDAwMDAwMDI1OCAwMDAwMCBuIAowMDAwMDAwMDA5IDAwMDAwIG4gCjAwMDAwMDAwNzMgMDAwMDAgbiAKdHJhaWxlcjw8L1Jvb3QgMiAwIFIvU2izeHRsMzQ+PnN0YXJ0Zhy=",
   }));
 });
 
