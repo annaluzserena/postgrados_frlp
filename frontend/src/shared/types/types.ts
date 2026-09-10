@@ -240,6 +240,23 @@ export const TIPOS_CARRERA: TipoCarrera[] = [
   "Doctorado",
 ];
 
+export interface FiltrosSeminario {
+  nombre?: string;
+  docente?: string;
+  es_obligatorio?: boolean;
+  horas_catedra?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface SeminariosPaginados {
+  seminarios: Seminario[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 //Datos academicos que solicitan para inscripcion de posgrado
 export const CARRERAS_POSGRADO = [
   { value: "maestria-datos", label: "Maestría en Ciencia de Datos" },
