@@ -1,4 +1,5 @@
 import { useState, type SyntheticEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { User, Lock, Mail } from 'lucide-react';
 import Header from '../components/Header';
 import Input from '../components/Input';
@@ -61,8 +62,9 @@ export default function LoginScreen() {
             value={contrasena}
             onChange={(e) => setContrasena(e.target.value)}
           />
-
+          <Link to="/dashboard" className="text-center">
           <Button type="submit">Ingresar</Button>
+          </Link>
 
           <a
             href="#"
