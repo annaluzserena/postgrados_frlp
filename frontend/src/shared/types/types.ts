@@ -110,6 +110,16 @@ export type TipoDocumento =
   | "FORM_BECA"
   | "TITULO_POSGRADO";
 
+export const ETIQUETA_TIPO: Record<TipoDocumento, string> = {
+  DNI: "DNI",
+  TITULO_GRADO: "Título de grado",
+  PARTIDA: "Partida de nacimiento",
+  CUIT_CUIL: "Constancia de CUIT/CUIL",
+  FORM_INSCRIPCION: "Formulario de inscripción",
+  FORM_BECA: "Formulario de solicitud de beca",
+  TITULO_POSGRADO: "Título de posgrado",
+};
+
 export interface Documento {
   id: string;
   legajo_id: string;
@@ -117,6 +127,24 @@ export interface Documento {
   nombre_original: string;
   tamanio_bytes: number;
   fecha_subida: string;
+}
+
+export type EstadoDocumento = "PENDIENTE_REVISION" | "APROBADO" | "OBSERVADO";
+ 
+export interface DocumentoConEstado extends Documento {
+  estado: EstadoDocumento;
+  motivo_observacion?: string; // solo si estado === "OBSERVADO"
+}
+ 
+// Respuesta de la consulta pública (sin login) de estado de inscripción
+export interface ConsultaLegajoResponse {
+  id: string;
+  numero_legajo: string | null;
+  nombre: string;
+  apellido: string;
+  estado: EstadoLegajo;
+  solicita_beca: boolean;
+  documentos: DocumentoConEstado[];
 }
 
 // Requests

@@ -119,13 +119,36 @@ export const handlers = [
     const paginados = resultado.slice(inicio, inicio + limit);
 
     return HttpResponse.json({
-    legajos: paginados,
-    total,
-    page,
-    limit,
-    totalPages,
-  });
+      legajos: paginados,
+      total,
+      page,
+      limit,
+      totalPages,
+    });
   }),
+
+  // GET /api/v1/legajos/consulta - Consulta sin login del estado de un legajo para la vista de aspirante/estudiante
+  http.get("/api/v1/legajos/consulta", async ({ request }) => {
+  await randomDelay();
+  const url = new URL(request.url);
+  const dni = url.searchParams.get("dni");
+  const email = url.searchParams.get("email");
+ 
+  const legajo = legajos.find((l) => l.dni === dni && l.email === email);
+  if (!legajo) {
+    return errorResponse(404, "NOT_FOUND", "No encontramos una inscripción con esos datos.");
+  }
+ 
+  return HttpResponse.json({
+    id: legajo.id,
+    numero_legajo: legajo.numero_legajo,
+    nombre: legajo.nombre,
+    apellido: legajo.apellido,
+    estado: legajo.estado,
+    solicita_beca: legajo.solicita_beca,
+    documentos: getDocumentosPorLegajo(legajo.id),
+  });
+}),
 
   // GET /api/v1/legajos/:id
   http.get("/api/v1/legajos/:id", async ({ params }) => {
@@ -196,9 +219,9 @@ export const handlers = [
 
   // GET /api/v1/legajos/:id/documentos
   http.get("/api/v1/legajos/:id/documentos", async ({ params }) => {
-  await randomDelay();
-  return HttpResponse.json(getDocumentosPorLegajo(params.id as string));
-}),
+    await randomDelay();
+    return HttpResponse.json(getDocumentosPorLegajo(params.id as string));
+  }), 
 
   // GET /api/v1/cohortes
   http.get("/api/v1/cohortes", async () => {
