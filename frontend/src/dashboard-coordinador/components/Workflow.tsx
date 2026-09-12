@@ -1,6 +1,8 @@
-import type { Legajo } from "@/shared/types/types";
+import type { EstadoLegajo, Legajo } from "@/shared/types/types";
 import { Button } from "@/shared/components/Button";
+import { Spinner } from "@/shared/components/Spinner";
 import { Check, ArrowLeft } from "lucide-react";
+import { useActualizarEstado } from "../hooks/useLegajos";
 
 interface WorkflowProps {
   legajo: Legajo;
@@ -54,7 +56,9 @@ export const Workflow = ({ legajo }: WorkflowProps) => {
     },
   ];
   const doneCount = steps.filter((s) => s.status === "done").length;
-  const progressPercent = (doneCount / (steps.length - 1)) * 100;
+  const progressPercent = Math.min((doneCount / (steps.length - 1)) * 100, 100);
+
+  const { mutate: actualizarLegajo, isPending } = useActualizarEstado();
 
   return (
     <div className="space-y-5">
@@ -111,20 +115,103 @@ export const Workflow = ({ legajo }: WorkflowProps) => {
       </div>
 
       <p className="text-xs text-ink-muted">
-        Estado actual: <strong className="text-ink">{legajo.estado}</strong>
+        Estado actual:{" "}
+        <strong className="text-ink">
+          {legajo.estado.replaceAll("_", " ")}
+        </strong>
       </p>
 
       <div className="flex flex-wrap gap-2">
-        <Button variant="primary" onClick={() => console.log("Avanzar")}>
-          Siguiente estado
-        </Button>
-        <Button
-          variant="outline"
-          icon={ArrowLeft}
-          onClick={() => console.log("Devolver")}
-        >
-          Devolver
-        </Button>
+        {legajo.estado === "PENDIENTE" && (
+          <Button disabled={isPending} variant="primary" onClick={() => console.log("Avanzar")}>
+            Revisar
+          </Button>
+        )}
+        {legajo.estado === "EN_REVISION" && (
+          <>
+            <Button
+            disabled={isPending}
+              variant="primary"
+              onClick={() =>
+                actualizarLegajo(
+                  { id: legajo.id, estado: "COMPLETADO" as EstadoLegajo },
+                  {
+                    onError: (error: Error) => {
+                      // manejar error
+                      console.log(error);
+                    },
+                  },
+                )
+              }
+            >
+              Aprobar
+            </Button>
+            <Button disabled={isPending} variant="primary" onClick={() =>
+                actualizarLegajo(
+                  { id: legajo.id, estado: "RECHAZADO" as EstadoLegajo },
+                  {
+                    onError: (error: Error) => {
+                      // manejar error
+                      console.log(error);
+                    },
+                  },
+                )
+              }>
+              Rechazar
+            </Button>
+            <Button
+            disabled={isPending}
+              variant="outline"
+              icon={ArrowLeft}
+              onClick={() =>
+                actualizarLegajo(
+                  { id: legajo.id, estado: "OBSERVADO" as EstadoLegajo },
+                  {
+                    onError: (error: Error) => {
+                      // manejar error
+                      console.log(error);
+                    },
+                  },
+                )
+              }
+            >
+              Observar
+            </Button>
+          </>
+        )}
+        {legajo.estado === "COMPLETADO" && (
+          <Button disabled={isPending} variant="primary" onClick={() =>
+                actualizarLegajo(
+                  { id: legajo.id, estado: "ACTIVO" as EstadoLegajo },
+                  {
+                    onError: (error: Error) => {
+                      // manejar error
+                      console.log(error);
+                    },
+                  },
+                )
+              }>
+            Matricular
+          </Button>
+        )}
+        {legajo.estado === "ACTIVO" && (
+          <Button disabled={isPending} variant="primary" onClick={() =>
+                actualizarLegajo(
+                  { id: legajo.id, estado: "BAJA" as EstadoLegajo },
+                  {
+                    onError: (error: Error) => {
+                      // manejar error
+                      console.log(error);
+                    },
+                  },
+                )
+              }>
+            Dar de baja
+          </Button>
+        )}
+        {isPending && (
+          <Spinner label="Actualizando estado..." />
+        )}
       </div>
     </div>
   );
