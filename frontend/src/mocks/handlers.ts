@@ -9,7 +9,7 @@ import type {
   Cohorte,
   Seminario,
 } from "@/shared/types/types";
-import { getDocumentosPorLegajo } from "./data/documentos";
+import { actualizarDocumento, getDocumentosPorLegajo } from "./data/documentos";
 
 let legajos: Legajo[] = [...legajosFixture];
 const cohortes: Cohorte[] = [...cohortesFixture];
@@ -216,6 +216,31 @@ export const handlers = [
       { status: 201 },
     );
   }),
+
+  // PATCH /api/v1/legajos/:id/documentos para observar un documento con un comentario
+  http.patch("/api/v1/legajos/:legajoId/documentos/:docId", async ({ params, request }) => {
+  await randomDelay();
+ 
+  const body = (await request.json()) as {
+    accion: "OBSERVAR" | "MARCAR_FALTANTE";
+    motivo: string;
+  };
+ 
+  if (!body.motivo || body.motivo.trim().length === 0) {
+    return errorResponse(400, "VALIDATION_ERROR", "El texto de observación es obligatorio", "motivo");
+  }
+ 
+  const actualizado = actualizarDocumento(params.docId as string, {
+    estado: body.accion === "MARCAR_FALTANTE" ? "FALTANTE" : "OBSERVADO",
+    motivo_observacion: body.motivo,
+  });
+ 
+  if (!actualizado) {
+    return errorResponse(404, "NOT_FOUND", "Documento no encontrado");
+  }
+ 
+  return HttpResponse.json(actualizado);
+}),
 
   // GET /api/v1/legajos/:id/documentos
   http.get("/api/v1/legajos/:id/documentos", async ({ params }) => {

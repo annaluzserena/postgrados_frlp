@@ -231,6 +231,16 @@ export const documentosFixture: DocumentoConEstado[] = [
   // (fecha_inscripcion es null, coherente con 0 documentos subidos).
 ];
 
+export const documentosState: DocumentoConEstado[] = [...documentosFixture];
+
+export function actualizarDocumento(docId: string, cambios: Partial<DocumentoConEstado>): DocumentoConEstado | null {
+  const index = documentosState.findIndex((d) => d.id === docId);
+  if (index === -1) return null;
+ 
+  documentosState[index] = { ...documentosState[index], ...cambios };
+  return documentosState[index];
+}
+
 /** Helper para el handler de MSW: documentos de un legajo puntual. */
 export function getDocumentosPorLegajo(legajoId: string): DocumentoConEstado[] {
   return documentosFixture.filter((d) => d.legajo_id === legajoId);

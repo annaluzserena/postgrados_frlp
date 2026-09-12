@@ -1,6 +1,6 @@
-import { keepPreviousData, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQuery} from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
-import type { FiltrosLegajo, Legajo, LegajosPaginados, EstadoLegajo } from "@/shared/types/types";
+import type { FiltrosLegajo, Legajo, LegajosPaginados } from "@/shared/types/types";
 
 function buildQueryString(filtros: FiltrosLegajo): string {
   const params = new URLSearchParams();
@@ -30,26 +30,3 @@ export function useLegajo(id: string) {
   });
 }
 
-// Patch del estado de un legajo (PATCH /api/v1/legajos/:id)
-interface propsPatch {
-  id: string,
-  estado: EstadoLegajo,
-}
-export function useActualizarEstado() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, estado }: propsPatch) =>
-      api.patch<Legajo>(`/legajos/${id}/estado`, { estado }),
-
-    onSuccess: (legajoActualizado, { id }) => {
-      queryClient.setQueryData(["legajos", id], legajoActualizado);
-
-      queryClient.invalidateQueries({
-        queryKey: ["legajos"],
-        exact: false,
-        predicate: (query) => typeof query.queryKey[1] === "object",
-      });
-    },
-  });
-}

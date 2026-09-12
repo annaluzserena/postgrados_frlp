@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useLegajo } from "../hooks/useLegajos";
 import { useDocumentos } from "../hooks/useDocumentos";
@@ -5,7 +6,12 @@ import { Spinner } from "@/shared/components/Spinner";
 import { Button } from "@/shared/components/Button";
 import { ArrowLeft, Download, Eye } from "lucide-react";
 import { Workflow } from "./Workflow";
-import { type TipoDocumento, ETIQUETA_TIPO } from "@/shared/types/types";
+import { ObservarDocumentoModal } from "./ObservarDocumentoModal";
+import {
+  type TipoDocumento,
+  ETIQUETA_TIPO,
+  type DocumentoConEstado,
+} from "@/shared/types/types";
 
 export default function DetalleLegajo() {
   const navigate = useNavigate();
@@ -26,6 +32,8 @@ export default function DetalleLegajo() {
   } = useDocumentos(id || " ");
   const iniciales =
     `${legajo?.nombre[0] || ""}${legajo?.apellido[0] || ""}`.toUpperCase();
+  const [docSeleccionado, setDocSeleccionado] =
+    useState<DocumentoConEstado | null>(null);
 
   if (isLoadingLegajo || isLoadingDocumentos) {
     return (
@@ -52,9 +60,11 @@ export default function DetalleLegajo() {
 
   return (
     <>
-    <Link to="/inscriptos">
-    <Button variant="ghost" icon={ArrowLeft}>Volver</Button>
-    </Link>
+      <Link to="/inscriptos">
+        <Button variant="ghost" icon={ArrowLeft}>
+          Volver
+        </Button>
+      </Link>
       <div className="flex flex-col gap-6">
         {/* Cabecera */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center border-b border-line pb-4">
@@ -177,7 +187,11 @@ export default function DetalleLegajo() {
 
           <div className="flex flex-col divide-y divide-line">
             {(Object.keys(ETIQUETA_TIPO) as TipoDocumento[]).map((t) => {
-              const doc = documentos?.find((d) => d.tipo === t);
+              const docsDeEseTipo =
+                documentos?.filter((d) => d.tipo === t) ?? [];
+              const doc =
+                docsDeEseTipo.find((d) => d.estado !== "FALTANTE") ??
+                docsDeEseTipo[0];
               const noAplica = t === "FORM_BECA" && !legajo?.solicita_beca;
 
               return (
@@ -209,13 +223,23 @@ export default function DetalleLegajo() {
                   </div>
 
                   {doc && (
-                    <Button variant="outline" icon={Eye} className="shrink-0">
+                    <Button
+                      variant="outline"
+                      icon={Eye}
+                      className="shrink-0"
+                      onClick={() => setDocSeleccionado(doc)}
+                    >
                       Visualizar
                     </Button>
                   )}
                 </div>
               );
             })}
+            <ObservarDocumentoModal
+              doc={docSeleccionado}
+              legajoId={legajo!.id}
+              onClose={() => setDocSeleccionado(null)}
+            />
           </div>
         </div>
         {legajo && <Workflow legajo={legajo} />}

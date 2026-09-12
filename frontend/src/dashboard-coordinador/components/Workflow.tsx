@@ -1,8 +1,8 @@
 import type { EstadoLegajo, Legajo } from "@/shared/types/types";
 import { Button } from "@/shared/components/Button";
 import { Spinner } from "@/shared/components/Spinner";
-import { Check, ArrowLeft } from "lucide-react";
-import { useActualizarEstado } from "../hooks/useLegajos";
+import { Check } from "lucide-react";
+import { useActualizarEstado } from "@/shared/hooks/useEstado";
 
 interface WorkflowProps {
   legajo: Legajo;
@@ -158,24 +158,6 @@ export const Workflow = ({ legajo }: WorkflowProps) => {
                 )
               }>
               Rechazar
-            </Button>
-            <Button
-            disabled={isPending}
-              variant="outline"
-              icon={ArrowLeft}
-              onClick={() =>
-                actualizarLegajo(
-                  { id: legajo.id, estado: "OBSERVADO" as EstadoLegajo },
-                  {
-                    onError: (error: Error) => {
-                      // manejar error
-                      console.log(error);
-                    },
-                  },
-                )
-              }
-            >
-              Observar
             </Button>
           </>
         )}

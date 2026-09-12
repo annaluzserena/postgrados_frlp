@@ -129,7 +129,7 @@ export interface Documento {
   fecha_subida: string;
 }
 
-export type EstadoDocumento = "PENDIENTE_REVISION" | "APROBADO" | "OBSERVADO";
+export type EstadoDocumento = "PENDIENTE_REVISION" | "APROBADO" | "OBSERVADO" | "FALTANTE";
  
 export interface DocumentoConEstado extends Documento {
   estado: EstadoDocumento;

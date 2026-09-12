@@ -45,7 +45,7 @@ function ListaInscriptos() {
 
   if (isLoadingLegajos || isLoadingCohortes) {
     return (
-      <div className="flex items-center gap-2 p-6 text-ink-secondary">
+      <div className="flex items-center gap-2 p-6 text-ink-secondary screen-shell relative">
         <Spinner size="sm" /> Cargando…
       </div>
     );
