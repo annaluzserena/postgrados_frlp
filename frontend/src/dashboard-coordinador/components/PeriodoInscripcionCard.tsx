@@ -5,21 +5,10 @@ import {
   usePeriodosInscripcion,
   useCrearPeriodo,
   useCerrarPeriodo,
-} from "../hooks/useCohortes";
+  formatFecha,
+  estaAbierto
+} from "@/shared/hooks/usePeriodos";
 import { NuevoPeriodoModal } from "./NuevoPeriodoModal";
-import type { PeriodoInscripcion } from "@/shared/types/types";
-
-function formatFecha(fecha: string): string {
-  const [anio, mes, dia] = fecha.split("-");
-  return `${dia}/${mes}/${anio}`;
-}
-
-function estaAbierto(periodo: PeriodoInscripcion): boolean {
-  const hoy = new Date().toISOString().slice(0, 10);
-  const despuesDeAbrir = periodo.fecha_abre <= hoy;
-  const antesDeCerrar = periodo.fecha_cierra === null || periodo.fecha_cierra >= hoy;
-  return despuesDeAbrir && antesDeCerrar;
-}
 
 interface PeriodoInscripcionCardProps {
   cohorteId: string;

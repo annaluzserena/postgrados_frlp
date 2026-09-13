@@ -14,6 +14,7 @@ import {
   actualizarPeriodo,
   crearPeriodo,
   getPeriodosPorCohorte,
+  getPeriodoVigente,
 } from "./data/periodos";
 
 let legajos: Legajo[] = [...legajosFixture];
@@ -134,26 +135,30 @@ export const handlers = [
 
   // GET /api/v1/legajos/consulta - Consulta sin login del estado de un legajo para la vista de aspirante/estudiante
   http.get("/api/v1/legajos/consulta", async ({ request }) => {
-  await randomDelay();
-  const url = new URL(request.url);
-  const dni = url.searchParams.get("dni");
-  const email = url.searchParams.get("email");
- 
-  const legajo = legajos.find((l) => l.dni === dni && l.email === email);
-  if (!legajo) {
-    return errorResponse(404, "NOT_FOUND", "No encontramos una inscripción con esos datos.");
-  }
- 
-  return HttpResponse.json({
-    id: legajo.id,
-    numero_legajo: legajo.numero_legajo,
-    nombre: legajo.nombre,
-    apellido: legajo.apellido,
-    estado: legajo.estado,
-    solicita_beca: legajo.solicita_beca,
-    documentos: getDocumentosPorLegajo(legajo.id),
-  });
-}),
+    await randomDelay();
+    const url = new URL(request.url);
+    const dni = url.searchParams.get("dni");
+    const email = url.searchParams.get("email");
+
+    const legajo = legajos.find((l) => l.dni === dni && l.email === email);
+    if (!legajo) {
+      return errorResponse(
+        404,
+        "NOT_FOUND",
+        "No encontramos una inscripción con esos datos.",
+      );
+    }
+
+    return HttpResponse.json({
+      id: legajo.id,
+      numero_legajo: legajo.numero_legajo,
+      nombre: legajo.nombre,
+      apellido: legajo.apellido,
+      estado: legajo.estado,
+      solicita_beca: legajo.solicita_beca,
+      documentos: getDocumentosPorLegajo(legajo.id),
+    });
+  }),
 
   // GET /api/v1/legajos/:id
   http.get("/api/v1/legajos/:id", async ({ params }) => {
@@ -223,35 +228,43 @@ export const handlers = [
   }),
 
   // PATCH /api/v1/legajos/:id/documentos para observar un documento con un comentario
-  http.patch("/api/v1/legajos/:legajoId/documentos/:docId", async ({ params, request }) => {
-  await randomDelay();
- 
-  const body = (await request.json()) as {
-    accion: "OBSERVAR" | "MARCAR_FALTANTE";
-    motivo: string;
-  };
- 
-  if (!body.motivo || body.motivo.trim().length === 0) {
-    return errorResponse(400, "VALIDATION_ERROR", "El texto de observación es obligatorio", "motivo");
-  }
- 
-  const actualizado = actualizarDocumento(params.docId as string, {
-    estado: body.accion === "MARCAR_FALTANTE" ? "FALTANTE" : "OBSERVADO",
-    motivo_observacion: body.motivo,
-  });
- 
-  if (!actualizado) {
-    return errorResponse(404, "NOT_FOUND", "Documento no encontrado");
-  }
- 
-  return HttpResponse.json(actualizado);
-}),
+  http.patch(
+    "/api/v1/legajos/:legajoId/documentos/:docId",
+    async ({ params, request }) => {
+      await randomDelay();
+
+      const body = (await request.json()) as {
+        accion: "OBSERVAR" | "MARCAR_FALTANTE";
+        motivo: string;
+      };
+
+      if (!body.motivo || body.motivo.trim().length === 0) {
+        return errorResponse(
+          400,
+          "VALIDATION_ERROR",
+          "El texto de observación es obligatorio",
+          "motivo",
+        );
+      }
+
+      const actualizado = actualizarDocumento(params.docId as string, {
+        estado: body.accion === "MARCAR_FALTANTE" ? "FALTANTE" : "OBSERVADO",
+        motivo_observacion: body.motivo,
+      });
+
+      if (!actualizado) {
+        return errorResponse(404, "NOT_FOUND", "Documento no encontrado");
+      }
+
+      return HttpResponse.json(actualizado);
+    },
+  ),
 
   // GET /api/v1/legajos/:id/documentos
   http.get("/api/v1/legajos/:id/documentos", async ({ params }) => {
-      await randomDelay();
-      return HttpResponse.json(getDocumentosPorLegajo(params.id as string));
-    }), 
+    await randomDelay();
+    return HttpResponse.json(getDocumentosPorLegajo(params.id as string));
+  }),
 
   // GET /api/v1/cohortes
   http.get("/api/v1/cohortes", async () => {
@@ -266,6 +279,13 @@ export const handlers = [
   http.get("/api/v1/cohortes/:cohorteId/periodos", async ({ params }) => {
     await randomDelay();
     return HttpResponse.json(getPeriodosPorCohorte(params.cohorteId as string));
+  }),
+
+  // GET /api/v1/periodos/vigente — público, sin login. El aspirante no
+  // necesita saber el cohorte_id: el backend lo calcula mirando fechas.
+  http.get("/api/v1/periodos/vigente", async () => {
+    await randomDelay();
+    return HttpResponse.json(getPeriodoVigente());
   }),
 
   // POST /api/v1/cohortes/:cohorteId/periodos

@@ -36,3 +36,16 @@ export function useAdjuntarDocumento(legajoId: string | undefined) {
     },
   });
 }
+
+interface PeriodoVigente {
+  abierto: boolean;
+  periodo: { fecha_abre: string; fecha_cierra: string | null } | null;
+  cohorte_id: string | null;
+}
+ 
+export function useEstadoInscripcionVigente() {
+  return useQuery({
+    queryKey: ["periodo-vigente"],
+    queryFn: () => api.get<PeriodoVigente>("/periodos/vigente", { auth: false }),
+  });
+}
