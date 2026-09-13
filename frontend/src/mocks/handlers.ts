@@ -10,6 +10,11 @@ import type {
   Seminario,
 } from "@/shared/types/types";
 import { getDocumentosPorLegajo } from "./data/documentos";
+import {
+  actualizarPeriodo,
+  crearPeriodo,
+  getPeriodosPorCohorte,
+} from "./data/periodos";
 
 let legajos: Legajo[] = [...legajosFixture];
 const cohortes: Cohorte[] = [...cohortesFixture];
@@ -119,12 +124,12 @@ export const handlers = [
     const paginados = resultado.slice(inicio, inicio + limit);
 
     return HttpResponse.json({
-    legajos: paginados,
-    total,
-    page,
-    limit,
-    totalPages,
-  });
+      legajos: paginados,
+      total,
+      page,
+      limit,
+      totalPages,
+    });
   }),
 
   // GET /api/v1/legajos/:id
@@ -196,9 +201,9 @@ export const handlers = [
 
   // GET /api/v1/legajos/:id/documentos
   http.get("/api/v1/legajos/:id/documentos", async ({ params }) => {
-  await randomDelay();
-  return HttpResponse.json(getDocumentosPorLegajo(params.id as string));
-}),
+    await randomDelay();
+    return HttpResponse.json(getDocumentosPorLegajo(params.id as string));
+  }),
 
   // GET /api/v1/cohortes
   http.get("/api/v1/cohortes", async () => {
@@ -207,6 +212,63 @@ export const handlers = [
     const resultado = cohortes;
 
     return HttpResponse.json(resultado);
+  }),
+
+  // GET /api/v1/cohortes/:cohorteId/periodos
+  http.get("/api/v1/cohortes/:cohorteId/periodos", async ({ params }) => {
+    await randomDelay();
+    return HttpResponse.json(getPeriodosPorCohorte(params.cohorteId as string));
+  }),
+
+  // POST /api/v1/cohortes/:cohorteId/periodos
+  http.post(
+    "/api/v1/cohortes/:cohorteId/periodos",
+    async ({ params, request }) => {
+      await randomDelay();
+      const body = (await request.json()) as {
+        fecha_abre: string;
+        fecha_cierra: string | null;
+      };
+
+      if (!body.fecha_abre) {
+        return errorResponse(
+          400,
+          "VALIDATION_ERROR",
+          "La fecha de apertura es obligatoria",
+          "fecha_abre",
+        );
+      }
+      if (body.fecha_cierra && body.fecha_cierra < body.fecha_abre) {
+        return errorResponse(
+          400,
+          "VALIDATION_ERROR",
+          "La fecha de cierre no puede ser anterior a la de apertura",
+          "fecha_cierra",
+        );
+      }
+
+      const nuevo = crearPeriodo(params.cohorteId as string, {
+        fecha_abre: body.fecha_abre,
+        fecha_cierra: body.fecha_cierra ?? null,
+      });
+
+      return HttpResponse.json(nuevo, { status: 201 });
+    },
+  ),
+
+  // PATCH /api/v1/periodos/:id  (usado para cerrar el período)
+  http.patch("/api/v1/periodos/:id", async ({ params, request }) => {
+    await randomDelay();
+    const body = (await request.json()) as { fecha_cierra: string | null };
+
+    const actualizado = actualizarPeriodo(params.id as string, {
+      fecha_cierra: body.fecha_cierra,
+    });
+    if (!actualizado) {
+      return errorResponse(404, "NOT_FOUND", "Período no encontrado");
+    }
+
+    return HttpResponse.json(actualizado);
   }),
 
   // GET /api/v1/seminarios
