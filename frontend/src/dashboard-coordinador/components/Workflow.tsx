@@ -1,19 +1,19 @@
 // ─────────────────────────────────────────────
-//  Workflow.tsx  (actualizado)
-//  US-CORE-004: el botón "Siguiente estado"
-//  queda deshabilitado si faltan documentos
-//  obligatorios cuando el legajo está en
-//  PENDIENTE (intentando pasar a EN_REVISION).
+//  Workflow.tsx  (versión final)
+//  - US-CORE-004: bloquea si faltan docs
+//  - US-C-004: notificación si pasa a ROJO
+//  - Botones con funcionalidad real
 // ─────────────────────────────────────────────
 
 import type { Documento, Legajo } from "@/shared/types/types";
 import { Button } from "@/shared/components/Button";
 import { Check, ArrowLeft, Lock } from "lucide-react";
 import { useFaltanDocs } from "./SeccionDocumentos";
+import { useAvanzarEstado, useDevolverEstado, siguienteEstado } from "../hooks/useAvanzarEstado";
 
 interface WorkflowProps {
   legajo:     Legajo;
-  documentos: Documento[];   // ← nuevo prop
+  documentos: Documento[];
 }
 
 type StepStatus = "done" | "active" | "pending";
@@ -24,13 +24,21 @@ const STEP_CLASSES: Record<StepStatus, string> = {
   pending: "bg-paper-elevated text-ink-muted ring-1 ring-inset ring-line",
 };
 
-export const Workflow = ({ legajo, documentos }: WorkflowProps) => {
-  // US-CORE-004: ¿faltan docs obligatorios?
-  const faltanDocs = useFaltanDocs(documentos, legajo.solicita_beca);
+// Label del botón según el estado actual
+const LABEL_SIGUIENTE: Partial<Record<string, string>> = {
+  BORRADOR:    "Enviar solicitud",
+  PENDIENTE:   "Enviar a revisión",
+  EN_REVISION: "Aprobar",
+  COMPLETADO:  "Activar matrícula",
+};
 
-  // Solo bloqueamos cuando el legajo está en PENDIENTE
-  // (quiere pasar a EN_REVISION = "Enviar a revisión")
-  const bloqueado = legajo.estado === "PENDIENTE" && faltanDocs;
+export const Workflow = ({ legajo, documentos }: WorkflowProps) => {
+  const faltanDocs  = useFaltanDocs(documentos, legajo.solicita_beca);
+  const bloqueado   = legajo.estado === "PENDIENTE" && faltanDocs;
+  const haySiguiente = !!siguienteEstado(legajo.estado);
+
+  const avanzar  = useAvanzarEstado();
+  const devolver = useDevolverEstado();
 
   const steps: { label: string; status: StepStatus }[] = [
     {
@@ -71,7 +79,7 @@ export const Workflow = ({ legajo, documentos }: WorkflowProps) => {
     },
   ];
 
-  const doneCount      = steps.filter(s => s.status === "done").length;
+  const doneCount       = steps.filter(s => s.status === "done").length;
   const progressPercent = (doneCount / (steps.length - 1)) * 100;
 
   return (
@@ -109,11 +117,7 @@ export const Workflow = ({ legajo, documentos }: WorkflowProps) => {
           {steps.map((step) => (
             <div key={step.label} className="flex flex-col items-center gap-2 text-center">
               <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors ${STEP_CLASSES[step.status]}`}>
-                {step.status === "done" ? (
-                  <Check size={16} />
-                ) : (
-                  steps.indexOf(step) + 1
-                )}
+                {step.status === "done" ? <Check size={16} /> : steps.indexOf(step) + 1}
               </div>
               <span className="max-w-20 text-xs font-medium text-ink-secondary">
                 {step.label}
@@ -127,7 +131,7 @@ export const Workflow = ({ legajo, documentos }: WorkflowProps) => {
         Estado actual: <strong className="text-ink">{legajo.estado}</strong>
       </p>
 
-      {/* ── US-CORE-004: aviso si está bloqueado ── */}
+      {/* Aviso bloqueo US-CORE-004 */}
       {bloqueado && (
         <div className="flex items-start gap-2.5 rounded-xl border border-semaforo-rojo/20 bg-semaforo-rojo-soft px-4 py-3 dark:bg-semaforo-rojo-soft-dark">
           <Lock size={15} className="mt-0.5 shrink-0 text-semaforo-rojo" />
@@ -138,31 +142,57 @@ export const Workflow = ({ legajo, documentos }: WorkflowProps) => {
         </div>
       )}
 
+      {/* Error de mutation */}
+      {(avanzar.isError || devolver.isError) && (
+        <div className="rounded-xl border border-semaforo-rojo/20 bg-semaforo-rojo-soft px-4 py-3 text-xs text-semaforo-rojo dark:bg-semaforo-rojo-soft-dark">
+          {((avanzar.error || devolver.error) as Error).message}
+        </div>
+      )}
+
       {/* Acciones */}
       <div className="flex flex-wrap gap-2">
-        <Button
-          variant="primary"
-          disabled={bloqueado}
-          onClick={() => console.log("Avanzar")}
-          // TODO: PATCH /api/legajos/:id/estado { estado: siguiente }
-        >
-          {bloqueado ? (
-            <span className="flex items-center gap-2">
-              <Lock size={14} /> Documentación incompleta
-            </span>
-          ) : (
-            "Siguiente estado"
-          )}
-        </Button>
 
-        <Button
-          variant="outline"
-          icon={ArrowLeft}
-          onClick={() => console.log("Devolver")}
-          // TODO: PATCH /api/legajos/:id/estado { estado: anterior }
-        >
-          Devolver
-        </Button>
+        {/* Siguiente estado */}
+        {haySiguiente && (
+          <Button
+            variant="primary"
+            disabled={bloqueado || avanzar.isPending}
+            onClick={() =>
+              avanzar.mutate({
+                legajoId:     legajo.id,
+                estadoActual: legajo.estado,
+              })
+            }
+          >
+            {avanzar.isPending ? (
+              "Guardando…"
+            ) : bloqueado ? (
+              <span className="flex items-center gap-2">
+                <Lock size={14} /> Documentación incompleta
+              </span>
+            ) : (
+              LABEL_SIGUIENTE[legajo.estado] ?? "Siguiente estado"
+            )}
+          </Button>
+        )}
+
+        {/* Devolver */}
+        {["PENDIENTE", "EN_REVISION", "COMPLETADO"].includes(legajo.estado) && (
+          <Button
+            variant="outline"
+            icon={ArrowLeft}
+            disabled={devolver.isPending}
+            onClick={() =>
+              devolver.mutate({
+                legajoId:     legajo.id,
+                estadoActual: legajo.estado,
+              })
+            }
+          >
+            {devolver.isPending ? "Guardando…" : "Devolver"}
+          </Button>
+        )}
+
       </div>
     </div>
   );
