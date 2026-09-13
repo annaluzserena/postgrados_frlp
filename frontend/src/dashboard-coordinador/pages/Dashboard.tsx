@@ -28,6 +28,7 @@ function Dashboard() {
         onNavigate={setCurrentPath}
       />
       <main className="scroll-fade flex-1 overflow-y-auto px-8 py-6 transition-colors">
+        {currentPath === "/panel" && <Alerta />}
         {currentPath === "/inscriptos" && <ListaInscriptos />}
         {currentPath === "/noticias" && <Alerta />}
         {currentPath === "/inscripcion" && (

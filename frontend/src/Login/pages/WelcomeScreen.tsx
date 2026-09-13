@@ -32,7 +32,6 @@ export default function WelcomeScreen() {
 
         <div className="flex flex-1 flex-col justify-center gap-4 px-6 pb-8 pt-2">
           <h1 className="text-center">Bienvenido Usuario</h1>
-
           <Button
             icon={PenLine}
             onClick={() => console.log('Nueva inscripción')}

@@ -535,7 +535,7 @@ export function SeccionBeca({
 
               <p className="text-xs leading-relaxed text-ink-secondary">
                 La solicitud quedará asociada a tu legajo y
-                será visible para el coordinador para su
+                será visible para el coordinador en su
                 evaluación.
               </p>
             </div>
