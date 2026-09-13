@@ -60,6 +60,13 @@ export interface Cohorte {
   fecha_inicio: string | null;
 }
 
+export interface PeriodoInscripcion {
+  id: string;
+  cohorte_id: string;
+  fecha_abre: string;
+  fecha_cierra: string | null;
+}
+
 export interface Seminario {
   id: string;
   nombre: string;
