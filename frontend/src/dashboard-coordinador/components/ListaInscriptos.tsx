@@ -190,14 +190,14 @@ function ListaInscriptos() {
             value={solo_con_beca === undefined ? "" : String(solo_con_beca)}
             onChange={(e) => {
               const v = e.target.value;
-              setBeca(v === "" ? undefined : v === "true");
+              console.log(v);
+              setBeca(v === "" ? undefined : true);
               setPage(1);
             }}
             className="!py-1.5 text-xs"
           >
             <option value="">Beca</option>
             <option value="true">Con beca</option>
-            <option value="false">Sin beca</option>
           </select>
         </div>
 
@@ -237,7 +237,9 @@ function ListaInscriptos() {
                     <Button
                       icon={Eye}
                       variant="ghost"
-                      onClick={() => navigate(`${legajo.id}`, {relative: 'route'})}
+                      onClick={() =>
+                        navigate(`${legajo.id}`, { relative: "route" })
+                      }
                     >
                       Ver legajo
                     </Button>
