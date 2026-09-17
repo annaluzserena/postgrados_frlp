@@ -16,6 +16,26 @@ import {
   getPeriodosPorCohorte,
   getPeriodoVigente,
 } from "./data/periodos";
+import type { CrearTrabajoFinalRequest, TrabajoFinal } from "@/shared/types/types";
+import type { Rol } from "@/shared/types/types";
+ 
+const usuarioActualMock: { email: string; rol: Rol } = {
+  email: "laura.martinez@fenix.test",
+  rol: "cpr",
+};
+ 
+let trabajosFinales: TrabajoFinal[] = [{
+  id: "1",
+  legajo_id: "leg-004",
+  tipo: "TFI",
+  titulo: "Especializacion",
+  director: "Ana",
+  codirector: null,
+  fecha_cpr: "12-12-2026",
+  numero_resolucion: "12000",
+  creado_por: "ana@example.com",
+  created_at: "17-09-2026"
+}];
 
 let legajos: Legajo[] = [...legajosFixture];
 const cohortes: Cohorte[] = [...cohortesFixture];
@@ -105,8 +125,7 @@ export const handlers = [
     const estado = url.searchParams.get("estado") as EstadoLegajo | null;
     const cohorte_id = url.searchParams.get("cohorte_id");
     const beca =
-      (url.searchParams.get("solo_con_beca") === "true" ? true : false) ||
-      undefined;
+      (url.searchParams.get("solo_con_beca") === null ? "" : true);
     const tipo_carrera = url.searchParams.get("tipo_carrera");
     const page = Number(url.searchParams.get("page") ?? "1");
     const limit = Number(url.searchParams.get("limit") ?? "10");
@@ -115,7 +134,7 @@ export const handlers = [
     if (estado) resultado = resultado.filter((l) => l.estado === estado);
     if (cohorte_id)
       resultado = resultado.filter((l) => l.cohorte_id === cohorte_id);
-    if (beca) resultado = resultado.filter((l) => l.solicita_beca === beca);
+    if (beca) resultado = resultado.filter((l) => l.solicita_beca);
     if (tipo_carrera)
       resultado = resultado.filter((l) => l.tipo_carrera === tipo_carrera);
 
@@ -265,6 +284,45 @@ export const handlers = [
     await randomDelay();
     return HttpResponse.json(getDocumentosPorLegajo(params.id as string));
   }),
+
+  // GET /api/v1/legajos/:id/trabajo-final
+http.get("/api/v1/legajos/:id/trabajo-final", async ({ params }) => {
+  await randomDelay();
+  const trabajo = trabajosFinales.find((t) => t.legajo_id === params.id);
+  return HttpResponse.json(trabajo ?? null);
+}),
+ 
+// POST /api/v1/legajos/:id/trabajo-final
+http.post("/api/v1/legajos/:id/trabajo-final", async ({ params, request }) => {
+  await randomDelay();
+ 
+  // BR-004: solo CPR puede crear/modificar registros de tesis.
+  if (usuarioActualMock.rol !== "cpr") {
+    return errorResponse(403, "FORBIDDEN", "No tenés permisos para registrar un trabajo final.");
+  }
+ 
+  const body = (await request.json()) as CrearTrabajoFinalRequest;
+ 
+  if (!body.titulo || !body.director || !body.fecha_cpr || !body.numero_resolucion) {
+    return errorResponse(400, "VALIDATION_ERROR", "Faltan campos obligatorios.");
+  }
+ 
+  const nuevo: TrabajoFinal = {
+    id: `tf-${Date.now()}`,
+    legajo_id: params.id as string,
+    tipo: body.tipo,
+    titulo: body.titulo,
+    director: body.director,
+    codirector: body.codirector,
+    fecha_cpr: body.fecha_cpr,
+    numero_resolucion: body.numero_resolucion,
+    creado_por: usuarioActualMock.email,
+    created_at: new Date().toISOString(),
+  };
+  trabajosFinales = [...trabajosFinales, nuevo];
+ 
+  return HttpResponse.json(nuevo, { status: 201 });
+}),
 
   // GET /api/v1/cohortes
   http.get("/api/v1/cohortes", async () => {
