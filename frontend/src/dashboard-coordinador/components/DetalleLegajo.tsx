@@ -1,20 +1,24 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useLegajo } from "../hooks/useLegajos";
 import { useDocumentos } from "../hooks/useDocumentos";
 import { Spinner } from "@/shared/components/Spinner";
 import { Button } from "@/shared/components/Button";
-import { ArrowLeft, Download, Eye } from "lucide-react";
+import { ArrowLeft, Download, Eye, GraduationCap } from "lucide-react";
 import { Workflow } from "./Workflow";
 import { ObservarDocumentoModal } from "./ObservarDocumentoModal";
+import { AltaTrabajoFinalModal } from "./AltaTrabajoFinalModal";
 import {
   type TipoDocumento,
   ETIQUETA_TIPO,
   type DocumentoConEstado,
 } from "@/shared/types/types";
+import { UserContext } from "@/shared/context/UserContext";
+import { useTrabajoFinal } from "../hooks/useTrabajoFinal";
 
 export default function DetalleLegajo() {
   const navigate = useNavigate();
+  const currentUser = useContext(UserContext);
   const { id } = useParams();
   console.log(id);
   if (!id) navigate("/inscriptos", { relative: "route" });
@@ -30,12 +34,21 @@ export default function DetalleLegajo() {
     isError: isErrorDocumentos,
     error: errorDocumentos,
   } = useDocumentos(id || " ");
+  const {
+    data: trabajo,
+    isLoading: isLoadingTrabajo,
+    isError: isErrorTrabajo,
+    error: errorTrabajo,
+  } = useTrabajoFinal(id || "");
   const iniciales =
     `${legajo?.nombre[0] || ""}${legajo?.apellido[0] || ""}`.toUpperCase();
   const [docSeleccionado, setDocSeleccionado] =
     useState<DocumentoConEstado | null>(null);
+  const [legajoParaTrabajoFinal, setLegajoParaTrabajoFinal] = useState<
+    string | null
+  >(null);
 
-  if (isLoadingLegajo || isLoadingDocumentos) {
+  if (isLoadingLegajo || isLoadingDocumentos || isLoadingTrabajo) {
     return (
       <div className="flex items-center gap-2 p-6 text-ink-secondary">
         <Spinner size="sm" /> Cargando…
@@ -43,7 +56,7 @@ export default function DetalleLegajo() {
     );
   }
 
-  if (isErrorLegajo || isErrorDocumentos) {
+  if (isErrorLegajo || isErrorDocumentos || isErrorTrabajo) {
     return (
       <div
         role="alert"
@@ -54,6 +67,9 @@ export default function DetalleLegajo() {
         <br />
         {isErrorDocumentos &&
           `No se pudieron cargar los documentos: ${(errorDocumentos as Error).message}`}
+        <br />
+        {isErrorTrabajo &&
+          `No se pudo cargar el trabajo final: ${(errorTrabajo as Error).message}`}
       </div>
     );
   }
@@ -82,6 +98,17 @@ export default function DetalleLegajo() {
             </div>
           </div>
           <div className="sm:ml-auto">
+            {currentUser.rol === "cpr" &&
+              legajo?.estado === "ACTIVO" &&
+              !trabajo && (
+                <Button
+                  variant="outline"
+                  icon={GraduationCap}
+                  onClick={() => setLegajoParaTrabajoFinal(legajo.id)}
+                >
+                  Trabajo Final
+                </Button>
+              )}
             <Button icon={Download} variant="outline">
               Exportar PDF
             </Button>
@@ -192,7 +219,9 @@ export default function DetalleLegajo() {
               const doc =
                 docsDeEseTipo.find((d) => d.estado !== "FALTANTE") ??
                 docsDeEseTipo[0];
-              const noAplica = t === "FORM_BECA" && !legajo?.solicita_beca;
+              const noAplica =
+                (t === "FORM_BECA" && !legajo?.solicita_beca) ||
+                (t === "TITULO_POSGRADO" && !legajo?.titulo_posgrado);
 
               return (
                 <div
@@ -242,8 +271,72 @@ export default function DetalleLegajo() {
             />
           </div>
         </div>
+        {/* Trabajo Final */}
+        {trabajo && (
+          <div className="rounded-xl border border-line bg-surface-alt/50 p-4">
+            <div className="text-xs font-bold uppercase tracking-wider text-ink-muted">
+              Trabajo Final
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+              <div className="rounded-xl border border-line bg-surface-alt/50 p-3">
+                <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                  Título
+                </div>
+                <div className="text-sm font-medium text-ink mt-1">
+                  {trabajo.titulo}
+                </div>
+              </div>
+              <div className="rounded-xl border border-line bg-surface-alt/50 p-3">
+                <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                  Director
+                </div>
+                <div className="text-sm font-medium text-ink mt-1">
+                  {trabajo.director}
+                </div>
+              </div>
+              <div className="rounded-xl border border-line bg-surface-alt/50 p-3">
+                <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                  Codirector
+                </div>
+                <div className="text-sm font-medium text-ink mt-1">
+                  {trabajo.codirector ?? "-"}
+                </div>
+              </div>
+              <div className="rounded-xl border border-line bg-surface-alt/50 p-3">
+                <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                  Tipo
+                </div>
+                <div className="text-sm font-medium text-ink mt-1">
+                  {trabajo.tipo}
+                </div>
+              </div>
+              <div className="rounded-xl border border-line bg-surface-alt/50 p-3">
+                <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                  Fecha
+                </div>
+                <div className="text-sm font-medium text-ink mt-1">
+                  {trabajo.fecha_cpr}
+                </div>
+              </div>
+              <div className="rounded-xl border border-line bg-surface-alt/50 p-3">
+                <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                  Número de resolución
+                </div>
+                <div className="text-sm font-medium text-ink mt-1">
+                  {trabajo.numero_resolucion}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         {legajo && <Workflow legajo={legajo} />}
       </div>
+      <AltaTrabajoFinalModal
+        isOpen={legajoParaTrabajoFinal !== null}
+        legajoId={legajoParaTrabajoFinal ?? ""}
+        usuarioRol={currentUser.rol}
+        onClose={() => setLegajoParaTrabajoFinal(null)}
+      />
     </>
   );
 }
