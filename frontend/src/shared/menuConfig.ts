@@ -24,7 +24,7 @@ export const menuItems: MenuItem[] = [
     label: "Inscriptos",
     href: "/inscriptos",
     icon: Users,
-    roles: ["coordinador", "admin"],
+    roles: ["coordinador", "cpr", "admin"],
   },
   {
     id: "inscripcion",
