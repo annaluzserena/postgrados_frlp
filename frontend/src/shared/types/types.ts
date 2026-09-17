@@ -94,6 +94,7 @@ export interface Legajo {
     pais: string;
   };
   titulo_grado: string;
+  titulo_posgrado?: string;
   motivacion: string;
   estado: EstadoLegajo;
   tipo_carrera: TipoCarrera | null;
@@ -312,3 +313,27 @@ export const DATOS_DOCUMENTOS_INICIAL: DatosDocumentos = DOCUMENTOS_REQUERIDOS.r
   (acc, doc) => ({ ...acc, [doc.id]: null }),
   {} as DatosDocumentos
 );
+
+export type TipoTrabajoFinal = "TFI" | "Maestria" | "Doctorado";
+ 
+export interface TrabajoFinal {
+  id: string;
+  legajo_id: string;
+  tipo: TipoTrabajoFinal;
+  titulo: string;
+  director: string;
+  codirector: string | null;
+  fecha_cpr: string; // "YYYY-MM-DD"
+  numero_resolucion: string;
+  creado_por: string; // email del usuario CPR que lo cargó (auditoría)
+  created_at: string;
+}
+ 
+export interface CrearTrabajoFinalRequest {
+  tipo: TipoTrabajoFinal;
+  titulo: string;
+  director: string;
+  codirector: string | null;
+  fecha_cpr: string;
+  numero_resolucion: string;
+}
