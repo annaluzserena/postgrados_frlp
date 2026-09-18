@@ -337,3 +337,14 @@ export interface CrearTrabajoFinalRequest {
   fecha_cpr: string;
   numero_resolucion: string;
 }
+
+export interface EstadisticasCohorte {
+  cohorte_id: string;
+  cohorte_nombre: string;
+  anio: number;
+  total_inscriptos: number;
+  activos: number;
+  graduados: number;
+  en_riesgo: number;
+  dados_de_baja: number;
+}
