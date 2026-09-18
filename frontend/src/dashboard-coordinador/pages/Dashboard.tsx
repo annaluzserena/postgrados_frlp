@@ -5,7 +5,7 @@ import { menuItems } from "@/shared/menuConfig";
 import ListaInscriptos from "../components/ListaInscriptos";
 //import Alerta from "@/AlertasNotificaciones/pages/Alerta";
 import DetalleLegajo from "../components/DetalleLegajo";
-import { PeriodoInscripcionCard } from "../components/PeriodoInscripcionCard";
+import Panel from "./Panel";
 import { UserContext } from "@/shared/context/UserContext";
 
 function Dashboard({path}: {path: string}) {
@@ -21,7 +21,7 @@ function Dashboard({path}: {path: string}) {
         onNavigate={navigate}
       />
       <main className="scroll-fade flex-1 overflow-y-auto px-8 py-6 transition-colors">
-        {path === "/panel" && currentUser.rol === "coordinador" && <PeriodoInscripcionCard cohorteId="c1a2b3c4-0001-0000-0000-000000000003" />}
+        {path === "/panel" && <Panel />}
         {path === "/inscriptos" && <ListaInscriptos />}
         {path === "/:id" && <DetalleLegajo />}
       </main>
