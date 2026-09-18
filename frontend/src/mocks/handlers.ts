@@ -16,7 +16,7 @@ import {
   getPeriodosPorCohorte,
   getPeriodoVigente,
 } from "./data/periodos";
-import type { CrearTrabajoFinalRequest, TrabajoFinal } from "@/shared/types/types";
+import type { CrearTrabajoFinalRequest, TrabajoFinal, EstadisticasCohorte, TipoCarrera } from "@/shared/types/types";
 import type { Rol } from "@/shared/types/types";
  
 const usuarioActualMock: { email: string; rol: Rol } = {
@@ -332,6 +332,36 @@ http.post("/api/v1/legajos/:id/trabajo-final", async ({ params, request }) => {
 
     return HttpResponse.json(resultado);
   }),
+
+  // GET /api/v1/estadisticas/cohortes?tipo_carrera= - traer unicamente las ultimas 3 cohortes
+http.get("/api/v1/estadisticas/cohortes", async ({ request }) => {
+  await randomDelay();
+  const url = new URL(request.url);
+  const tipoCarrera = url.searchParams.get("tipo_carrera") as TipoCarrera | null;
+ 
+  // Últimas 3 cohortes por año, más reciente primero.
+  const ultimasCohortes = [...cohortes].sort((a, b) => b.anio - a.anio).slice(0, 3);
+ 
+  const estadisticas: EstadisticasCohorte[] = ultimasCohortes.map((cohorte) => {
+    let legajosDeCohorte = legajos.filter((l) => l.cohorte_id === cohorte.id);
+    if (tipoCarrera) {
+      legajosDeCohorte = legajosDeCohorte.filter((l) => l.tipo_carrera === tipoCarrera);
+    }
+ 
+    return {
+      cohorte_id: cohorte.id,
+      cohorte_nombre: cohorte.nombre,
+      anio: cohorte.anio,
+      total_inscriptos: legajosDeCohorte.filter((l) => l.estado !== "BORRADOR").length,
+      activos: legajosDeCohorte.filter((l) => l.estado === "ACTIVO").length,
+      graduados: legajosDeCohorte.filter((l) => l.estado === "GRADUADO").length,
+      en_riesgo: legajosDeCohorte.filter((l) => l.semaforo === "ROJO").length,
+      dados_de_baja: legajosDeCohorte.filter((l) => l.estado === "BAJA").length,
+    };
+  });
+ 
+  return HttpResponse.json(estadisticas);
+}),
 
   // GET /api/v1/cohortes/:cohorteId/periodos
   http.get("/api/v1/cohortes/:cohorteId/periodos", async ({ params }) => {
