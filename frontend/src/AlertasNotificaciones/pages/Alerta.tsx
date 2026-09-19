@@ -1,137 +1,83 @@
-// ─────────────────────────────────────────────
-//  Alerta.tsx  (reemplaza al existente)
-//  Usa el tipo extendido + acciones por tipo
-// ─────────────────────────────────────────────
-
 import { useState } from 'react';
-import { NotificationsButton } from '@/shared/components/NotificationsButton';
 import { NotificacionCard } from '../components/NotificacionCard';
-import type { Notificacion } from '../types/notificacion.types';
-import {
-  crearNotificacionBeca,
-  crearNotificacionDocFaltante,
-  crearNotificacionRiesgo,
-  crearNotificacionDocenteInactivo,
-} from '../services/notificacion.service';
+import type { Notificacion, MetaDocenteSinAsistencia } from '../types/notificacion.types';
 
-// ── Mock con los 4 tipos nuevos ───────────────
-// Reemplazar por fetch a la API cuando el backend esté listo.
+interface AlertaProps {
+  notificaciones:  Notificacion[];
+  onMarcarLeido:   (id: string) => void;
+  onActualizar:    (fn: (prev: Notificacion[]) => Notificacion[]) => void;
+}
 
-const mockNotificaciones: Notificacion[] = [
-  // US-CORE-002
-  crearNotificacionBeca({
-    aspiranteId: 'asp-1',
-    aspiranteNombre: 'Carlos Ruiz',
-    carrera: 'Especialización en Ciberseguridad',
-    porcentajeBeca: 100,
-    cohorte: '2025',
-  }, new Date(Date.now() - 5 * 3_600_000)),
+export default function Alerta({ notificaciones, onMarcarLeido, onActualizar }: AlertaProps) {
+  const [toast, setToast] = useState<string | null>(null);
 
-  // US-CORE-004
-  crearNotificacionDocFaltante({
-    legajoId: 'leg-2',
-    alumnoNombre: 'María López',
-    documentosFaltantes: ['DNI', 'Analítico de grado'],
-    diasRestantes: 3,
-  }, new Date(Date.now() - 2 * 3_600_000)),
-
-  // US-C-004
-  crearNotificacionRiesgo({
-    alumnoId: 'alu-3',
-    alumnoNombre: 'Pedro Martínez',
-    carrera: 'Maestría en Gestión Tecnológica',
-    motivoRiesgo: 'Sin avance en tesis hace 62 días',
-    diasEnRojo: 8,
-  }, new Date(Date.now() - 30 * 60_000)),
-
-  // US-D-004
-  crearNotificacionDocenteInactivo({
-    docenteId: 'doc-4',
-    docenteNombre: 'Ing. Fernández',
-    seminario: 'Seminario de Redes Avanzadas',
-    diasSinCargar: 17,
-    alumnosSinRegistro: 12,
-  }, new Date(Date.now() - 10 * 60_000)),
-];
-
-// ─────────────────────────────────────────────
-
-export default function Alerta() {
-  const [notificaciones, setNotificaciones] = useState<Notificacion[]>(mockNotificaciones);
-
-  // ── Acciones comunes ──────────────────────
-  const marcarLeido = (id: string) =>
-    setNotificaciones(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  const mostrarToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const eliminar = (id: string) =>
-    setNotificaciones(prev => prev.filter(n => n.id !== id));
+    onActualizar(prev => prev.filter(n => n.id !== id));
 
-  // US-CORE-002: aprobar beca
-  const handleAprobarBeca = (id: string) => {
-    console.log('[CORE-002] Beca aprobada:', id);
-    // TODO: PATCH /api/becas/:id  { estado: 'aprobada' }
-    marcarLeido(id);
-  };
-
-  // US-CORE-002 / genérico: rechazar
-  const handleRechazar = (id: string) => {
-    console.log('[CORE-002] Rechazado:', id);
-    // TODO: PATCH /api/becas/:id  { estado: 'rechazada' }
-    eliminar(id);
-  };
-
-  // Delegar (cualquier tipo)
   const handleDelegar = (id: string) => {
-    console.log('Delegado:', id);
-    // TODO: POST /api/notificaciones/:id/delegar
-    marcarLeido(id);
+    onMarcarLeido(id);
+    mostrarToast('Notificación delegada');
   };
 
-  // US-CORE-004: ir al legajo
+  const handleAprobarBeca = (id: string) => {
+    onMarcarLeido(id);
+    mostrarToast('✓ Beca aprobada correctamente');
+    // TODO: PATCH /api/becas/:id { estado: 'aprobada' }
+  };
+
+  const handleRechazar = (id: string) => {
+    eliminar(id);
+    mostrarToast('Solicitud rechazada');
+    // TODO: PATCH /api/becas/:id { estado: 'rechazada' }
+  };
+
   const handleVerLegajo = (id: string) => {
     const notif = notificaciones.find(n => n.id === id);
     if (!notif) return;
-    const meta = notif.meta as { legajoId?: string };
-    console.log('[CORE-004] Ver legajo:', meta.legajoId);
+    onMarcarLeido(id);
+    mostrarToast('Abriendo legajo…');
     // TODO: router.push(`/legajos/${meta.legajoId}`)
-    marcarLeido(id);
   };
 
-  // US-C-004: ir al alumno
   const handleVerAlumno = (id: string) => {
-    const notif = notificaciones.find(n => n.id === id);
-    if (!notif) return;
-    const meta = notif.meta as { alumnoId?: string };
-    console.log('[C-004] Ver alumno:', meta.alumnoId);
+    onMarcarLeido(id);
+    mostrarToast('Abriendo legajo del alumno…');
     // TODO: router.push(`/alumnos/${meta.alumnoId}`)
-    marcarLeido(id);
   };
 
-  // US-D-004: notificar docente manualmente
   const handleNotificarDocente = (id: string) => {
     const notif = notificaciones.find(n => n.id === id);
     if (!notif) return;
-    const meta = notif.meta as { docenteId?: string; docenteNombre?: string };
-    console.log('[D-004] Notificando docente:', meta.docenteId);
+    const meta = notif.meta as MetaDocenteSinAsistencia;
+    onMarcarLeido(id);
+    mostrarToast(`✓ Recordatorio enviado a ${meta.docenteNombre}`);
     // TODO: POST /api/docentes/:id/recordatorio
-    marcarLeido(id);
   };
 
-  // ── Render ────────────────────────────────
   const sinLeer = notificaciones.filter(n => !n.read).length;
 
   return (
-    <div>
+    <div className="relative">
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 rounded-xl bg-ink px-4 py-3 text-sm font-medium text-paper shadow-lg animate-in fade-in slide-in-from-bottom-2">
+          {toast}
+        </div>
+      )}
+
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold">Notificaciones</h1>
           {sinLeer > 0 && (
-            <p className="mt-0.5 text-sm text-ink-secondary">
-              {sinLeer} sin leer
-            </p>
+            <p className="mt-0.5 text-sm text-ink-secondary">{sinLeer} sin leer</p>
           )}
         </div>
-        <NotificationsButton notifications={notificaciones} />
       </div>
 
       {notificaciones.length === 0 ? (
@@ -147,7 +93,7 @@ export default function Alerta() {
               onAprobar={handleAprobarBeca}
               onRechazar={handleRechazar}
               onDelegar={handleDelegar}
-              onMarcarLeido={marcarLeido}
+              onMarcarLeido={onMarcarLeido}
               onVerLegajo={handleVerLegajo}
               onVerAlumno={handleVerAlumno}
               onNotificarDocente={handleNotificarDocente}

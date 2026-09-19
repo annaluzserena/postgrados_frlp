@@ -9,6 +9,7 @@ import {
   CalendarDays,
   FileText,
   Newspaper,
+  Bell,
 } from "lucide-react";
 import type { MenuItem } from "@/shared/types/types";
 
@@ -62,6 +63,12 @@ export const menuItems: MenuItem[] = [
     roles: ["coordinador", "admin"],
   },
   {
+    id: "notificaciones",
+    label: "Notificaciones",
+    href: "/notificaciones",
+    icon: Bell,
+  },
+    {
     id: "noticias",
     label: "Noticias",
     href: "/noticias",

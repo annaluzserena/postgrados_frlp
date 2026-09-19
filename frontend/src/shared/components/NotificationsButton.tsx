@@ -11,9 +11,10 @@ export interface Notification {
 
 interface NotificationsButtonProps {
   notifications: Notification[];
+  onClick: () => void;
 }
 
-export function NotificationsButton({ notifications }: NotificationsButtonProps) {
+export function NotificationsButton({ notifications, onClick }: NotificationsButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const unreadCount = notifications.filter((n) => !n.read).length;
