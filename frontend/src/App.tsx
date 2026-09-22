@@ -4,6 +4,7 @@ import LoginScreen from "./Login/pages/Login";
 import WelcomeScreen from "./Login/pages/WelcomeScreen";
 import NotFound from "./shared/pages/NotFound";
 import InscripcionWizard from './inscripcion-aspirante/pages/InscripcionWizard';
+import RegistroAsistencia from './modulo-docente/pages/RegistroAsistencia';
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
           <Route path="welcome" element={<WelcomeScreen />}/>
           <Route path="inscripcion" element={<InscripcionWizard />}/>
           <Route path="*" element={<NotFound />}/>
+          <Route path="asistencia" element={<RegistroAsistencia />} />
         </Route>
       </Routes>
     </BrowserRouter>
