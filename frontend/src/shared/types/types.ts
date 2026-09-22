@@ -136,7 +136,7 @@ export interface CrearLegajoRequest {
   titulo_grado: string;
   titulo_posgrado?: string;
   como_conocio: string;
-  motivacion: string; // min 50 caracteres
+  motivacion: string; // max 500 caracteres
   solicita_beca: boolean;
   tipo_beca?: TipoBeca;
 }
@@ -175,25 +175,7 @@ export interface DatosPersonales {
   };
   solicitaBeca: boolean;
   tipoBeca?: TipoBeca;
-}
-
-export interface DatosPersonales {
-  apellido: string;
-  nombre: string;
-  nacionalidad: string;
-  documento: string;
-  telefonoMovil: string;
-  telefonoFijo: string;
-  email: string;
-  emailAlternativo: string;
-  domicilio: {
-    direccion: string;
-    ciudad: string;
-    provincia: string;
-    pais: string;
-  };
-  solicitaBeca: boolean;
-  tipoBeca?: TipoBeca;
+  comprobanteBeca: undefined | File;
 }
 
 export const DATOS_PERSONALES_INICIAL: DatosPersonales = {
@@ -213,8 +195,8 @@ export const DATOS_PERSONALES_INICIAL: DatosPersonales = {
   },
   solicitaBeca: false,
   tipoBeca: undefined,
+  comprobanteBeca: undefined,
 };
-
 
 export interface DatosAcademicos {
   tipoCarreras: TipoCarrera[]; // máximo 2
@@ -270,10 +252,10 @@ export const DOCUMENTOS_REQUERIDOS: DocumentoRequerido[] = [
   { id: "dni", label: "Copia del DNI" },
 ];
 
-// Mapa id -> archivo cargado (o null si no hay nada aún)
-export type DatosDocumentos = Record<string, File | null>;
+// Mapa id -> archivo cargado (o undefined si no hay nada aún)
+export type DatosDocumentos = Record<string, File | undefined>;
 
 export const DATOS_DOCUMENTOS_INICIAL: DatosDocumentos = DOCUMENTOS_REQUERIDOS.reduce(
-  (acc, doc) => ({ ...acc, [doc.id]: null }),
+  (acc, doc) => ({ ...acc, [doc.id]: undefined }),
   {} as DatosDocumentos
 );
