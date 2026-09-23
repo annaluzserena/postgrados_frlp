@@ -4,7 +4,6 @@ import * as XLSX from "xlsx-js-style";
 import type { EstadoLegajo, TipoCarrera } from "@/shared/types/types";
 import { useLegajos } from "../hooks/useLegajos";
 import { useCohortes } from "../hooks/useCohortes";
-import { api } from "@/shared/api/client";
 import { Spinner } from "@/shared/components/Spinner";
 import { BadgeEstado } from "./BadgeEstado";
 import { Button } from "@/shared/components/Button";
@@ -35,8 +34,8 @@ function ListaInscriptos() {
     solo_con_beca,
     tipo_carrera,
     cohorte_id,
-    page,
-    limit,
+    page: isExporting ? 1 : page,
+    limit: isExporting ? 1000 : limit,
   });
   const {
     data: cohortes,
@@ -46,20 +45,11 @@ function ListaInscriptos() {
   } = useCohortes();
   const totalPages = legajos?.totalPages ?? 1;
 
-  
   const handleExportExcel = async () => {
     try {
       setIsExporting(true);
-      
-      const params = new URLSearchParams();
-      if (estado) params.set("estado", estado);
-      if (cohorte_id) params.set("cohorte_id", cohorte_id);
-      if (tipo_carrera) params.set("tipo_carrera", tipo_carrera);
-      if (solo_con_beca !== undefined) params.set("solo_con_beca", String(solo_con_beca));
-      params.set("limit", "1000");
 
-      const response = await api.get<any>(`/legajos?${params.toString()}`);
-      const todosLosLegajos = response.legajos || [];
+      const todosLosLegajos = legajos?.legajos || [];
 
       const filtradosParaExportar = todosLosLegajos.filter(
         (legajo: any) =>
