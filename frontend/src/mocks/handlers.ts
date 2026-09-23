@@ -210,11 +210,42 @@ export const handlers = [
   }),
 
   // GET /api/v1/seminarios
-  http.get("/api/v1/seminarios", async () => {
+  http.get("/api/v1/seminarios", async ({ request }) => {
     await randomDelay();
+    const url = new URL(request.url);
+    const nombre = url.searchParams.get("nombre");
+    const docente = url.searchParams.get("docente");
+    const es_obligatorio = url.searchParams.get("es_obligatorio");
+    const page = Number(url.searchParams.get("page") ?? "1");
+    const limit = Number(url.searchParams.get("limit") ?? "10");
 
-    const resultado = seminarios;
+    let resultado = seminarios;
+    if (nombre) {
+      resultado = resultado.filter((s) => 
+        s.nombre.toLowerCase().includes(nombre.toLowerCase())
+      );
+    }
+    if (docente) {
+      resultado = resultado.filter((s) => 
+        s.docente.toLowerCase().includes(docente.toLowerCase())
+      );
+    }
+    if (es_obligatorio !== null) {
+      const esObligatorioBool = es_obligatorio === "true";
+      resultado = resultado.filter((s) => s.es_obligatorio === esObligatorioBool);
+    }
 
-    return HttpResponse.json(resultado);
+    const total = resultado.length;
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    const inicio = (page - 1) * limit;
+    const paginados = resultado.slice(inicio, inicio + limit);
+
+    return HttpResponse.json({
+      seminarios: paginados,
+      total,
+      page,
+      limit,
+      totalPages,
+    });
   }),
 ];

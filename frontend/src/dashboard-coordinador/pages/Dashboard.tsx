@@ -3,6 +3,7 @@ import { Sidebar } from "@/shared/components/Sidebar";
 import { menuItems } from "@/shared/menuConfig";
 import type { User } from "@/shared/types/types";
 import ListaInscriptos from "../components/ListaInscriptos";
+import ListaSeminarios from "../components/ListaSeminarios"; 
 import Alerta from "@/AlertasNotificaciones/pages/Alerta";
 
 // User de ejemplo
@@ -27,6 +28,7 @@ function Dashboard() {
       <main className="scroll-fade flex-1 overflow-y-auto px-8 py-6 transition-colors">
         {currentPath === "/panel" && <Alerta />}
         {currentPath === "/inscriptos" && <ListaInscriptos />}
+        {currentPath === "/seminarios" && <ListaSeminarios />}
       </main>
     </div>
   );
