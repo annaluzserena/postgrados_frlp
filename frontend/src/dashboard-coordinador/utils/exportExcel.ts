@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx";
+import * as XLSX from "xlsx-js-style";
 
 interface ExportMetadata {
   fechaGeneracion: string;
@@ -17,20 +17,23 @@ export function exportarExcel(
   // Hoja principal con los datos
   const worksheet = XLSX.utils.json_to_sheet(datos);
 
-  // Encabezados en negrita
   const headers = Object.keys(datos[0] ?? {});
+
+  // Encabezados en negrita
   headers.forEach((_, index) => {
     const cellAddress = XLSX.utils.encode_cell({ r: 0, c: index });
 
     if (worksheet[cellAddress]) {
       worksheet[cellAddress].s = {
-        font: { bold: true },
+        font: {
+          bold: true,
+        },
       };
     }
   });
 
   // Ajustar automáticamente el ancho de las columnas
-  const columnWidths = headers.map((header) => {
+  worksheet["!cols"] = headers.map((header) => {
     const maxLength = Math.max(
       header.length,
       ...datos.map((fila) => String(fila[header] ?? "").length),
@@ -40,8 +43,6 @@ export function exportarExcel(
       wch: Math.min(Math.max(maxLength + 2, 10), 50),
     };
   });
-
-  worksheet["!cols"] = columnWidths;
 
   // Filtros automáticos
   if (headers.length > 0 && datos.length > 0) {
@@ -74,7 +75,9 @@ export function exportarExcel(
   ["A1", "A5"].forEach((cell) => {
     if (metadataSheet[cell]) {
       metadataSheet[cell].s = {
-        font: { bold: true },
+        font: {
+          bold: true,
+        },
       };
     }
   });
