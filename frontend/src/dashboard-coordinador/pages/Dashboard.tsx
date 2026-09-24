@@ -30,7 +30,7 @@ function Dashboard() {
         {currentPath === "/panel" && <Alerta />}
         {currentPath === "/inscriptos" && <ListaInscriptos />}
         {currentPath === "/seminarios" && <ListaSeminarios />}
-        {currentPath === "/riesgo" && <EstudiantesEnRiesgoPage />} // Agrego la nueva página de estudiantes en riesgo
+        {currentPath === "/riesgo" && <EstudiantesEnRiesgoPage />}
       </main>
     </div>
   );
