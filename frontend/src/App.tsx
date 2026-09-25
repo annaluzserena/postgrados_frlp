@@ -10,8 +10,8 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/">
-          <Route index element={<Dashboard />}/>
-          <Route path="login" element={<LoginScreen />}/>
+          <Route index element={<LoginScreen />}/>
+          <Route path="dashboard" element={<Dashboard />}/>
           <Route path="welcome" element={<WelcomeScreen />}/>
           <Route path="inscripcion" element={<InscripcionWizard />}/>
           <Route path="*" element={<NotFound />}/>

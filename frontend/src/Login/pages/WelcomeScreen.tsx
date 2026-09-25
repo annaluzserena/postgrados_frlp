@@ -3,6 +3,7 @@ import { Button } from '../../shared/components/Button';
 import Header from '../components/Header';
 import LogoFenix from '../../assets/LogoFenix.png';
 import UtnLogo from '../../assets/UtnLogo.png';
+import { Link } from 'react-router-dom';
 
 export default function WelcomeScreen() {
   return (
@@ -31,12 +32,13 @@ export default function WelcomeScreen() {
 
         <div className="flex flex-1 flex-col justify-center gap-4 px-6 pb-8 pt-2">
           <h1 className="text-center">Bienvenido Usuario</h1>
-
           <Button
             icon={PenLine}
             onClick={() => console.log('Nueva inscripción')}
           >
+            <Link to="/inscripcion">
             Nueva inscripción
+            </Link>
           </Button>
 
           <Button
