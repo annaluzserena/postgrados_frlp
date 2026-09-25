@@ -5,6 +5,7 @@ import type { User } from "@/shared/types/types";
 import ListaInscriptos from "../components/ListaInscriptos";
 import ListaSeminarios from "../components/ListaSeminarios"; 
 import Alerta from "@/AlertasNotificaciones/pages/Alerta";
+import EstudiantesEnRiesgoPage from "./EstudiantesEnRiesgoPage";
 
 // User de ejemplo
 const currentUser: User = {
@@ -29,6 +30,7 @@ function Dashboard() {
         {currentPath === "/panel" && <Alerta />}
         {currentPath === "/inscriptos" && <ListaInscriptos />}
         {currentPath === "/seminarios" && <ListaSeminarios />}
+        {currentPath === "/riesgo" && <EstudiantesEnRiesgoPage />}
       </main>
     </div>
   );
