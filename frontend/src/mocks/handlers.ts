@@ -2,18 +2,21 @@ import { http, HttpResponse, delay } from "msw";
 import { legajosFixture } from "./data/legajos";
 import { cohortesFixture } from "./data/cohortes";
 import { seminariosFixture } from "./data/seminarios";
+import { alumnosFixture, clasesFixture } from "./data/clases";
 import type {
   CrearLegajoRequest,
   EstadoLegajo,
   Legajo,
   Cohorte,
   Seminario,
+  Clase,
 } from "@/shared/types/types";
 import { getDocumentosPorLegajo } from "./data/documentos";
 
 let legajos: Legajo[] = [...legajosFixture];
 const cohortes: Cohorte[] = [...cohortesFixture];
 const seminarios: Seminario[] = [...seminariosFixture];
+let clases: Clase[] = [...clasesFixture];
 
 const LATENCIA_MS = { min: 300, max: 800 };
 const randomDelay = () =>
@@ -247,5 +250,62 @@ export const handlers = [
       limit,
       totalPages,
     });
+  }),
+
+  // GET /api/v1/seminarios/:seminarioId/alumnos
+  http.get("/api/v1/seminarios/:seminarioId/alumnos", async () => {
+    await randomDelay();
+    return HttpResponse.json(alumnosFixture);
+  }),
+
+  // GET /api/v1/seminarios/:seminarioId/clases
+  http.get("/api/v1/seminarios/:seminarioId/clases", async ({ params }) => {
+    await randomDelay();
+    const resultado = clases.filter(
+      (c) => c.seminarioId === params.seminarioId,
+    );
+    return HttpResponse.json(resultado);
+  }),
+
+  // POST /api/v1/seminarios/:seminarioId/clases
+  http.post("/api/v1/seminarios/:seminarioId/clases", async ({ params, request }) => {
+    await randomDelay();
+    const body = (await request.json()) as { fecha: string };
+
+    const nuevaClase: Clase = {
+      id: `clase-${Date.now()}`,
+      seminarioId: params.seminarioId as string,
+      fecha: body.fecha,
+      asistencias: alumnosFixture.map((a) => ({
+        alumnoId: a.id,
+        presente: false,
+      })),
+    };
+    clases = [...clases, nuevaClase];
+
+    return HttpResponse.json(nuevaClase, { status: 201 });
+  }),
+
+  // PATCH /api/v1/clases/:claseId/asistencia
+  http.patch("/api/v1/clases/:claseId/asistencia", async ({ params, request }) => {
+    await randomDelay();
+    const body = (await request.json()) as {
+      alumnoId: string;
+      presente: boolean;
+    };
+
+    const clase = clases.find((c) => c.id === params.claseId);
+    if (!clase) {
+      return errorResponse(404, "NOT_FOUND", "Clase no encontrada");
+    }
+
+    const asistencia = clase.asistencias.find(
+      (a) => a.alumnoId === body.alumnoId,
+    );
+    if (asistencia) {
+      asistencia.presente = body.presente;
+    }
+
+    return HttpResponse.json(clase);
   }),
 ];
