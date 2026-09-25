@@ -7,6 +7,9 @@ import ListaInscriptos from "../components/ListaInscriptos";
 import DetalleLegajo from "../components/DetalleLegajo";
 import Panel from "./Panel";
 import { UserContext } from "@/shared/context/UserContext";
+import ListaSeminarios from "../components/ListaSeminarios"; 
+import Alerta from "@/AlertasNotificaciones/pages/Alerta";
+import EstudiantesEnRiesgoPage from "./EstudiantesEnRiesgoPage";
 
 function Dashboard({path}: {path: string}) {
   const navigate = useNavigate();
@@ -24,6 +27,8 @@ function Dashboard({path}: {path: string}) {
         {path === "/panel" && <Panel />}
         {path === "/inscriptos" && <ListaInscriptos />}
         {path === "/:id" && <DetalleLegajo />}
+        {path === "/seminarios" && <ListaSeminarios />}
+        {path === "/riesgo" && <EstudiantesEnRiesgoPage />}
       </main>
     </div>
   );
