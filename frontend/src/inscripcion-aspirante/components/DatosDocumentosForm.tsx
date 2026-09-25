@@ -19,7 +19,7 @@ function EstadoBadge({
   archivo,
   opcional,
 }: {
-  archivo: File | null;
+  archivo: File | undefined;
   opcional?: boolean;
 }) {
   if (archivo) {
@@ -145,9 +145,9 @@ export function DatosDocumentosForm({
   onSaveDraft,
 }: DatosDocumentosFormProps) {
   const [documentos, setDocumentos] = useState<DatosDocumentos>(initialData);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | undefined>(undefined);
 
-  const handleSelectFile = (id: string, file: File | null) => {
+  const handleSelectFile = (id: string, file: File | undefined) => {
     setDocumentos((prev) => ({ ...prev, [id]: file }));
     // setError(null);
   };
@@ -155,7 +155,11 @@ export function DatosDocumentosForm({
   const faltantes = DOCUMENTOS_REQUERIDOS.filter(
     (doc) => !doc.opcional && !documentos[doc.id]
   );
-
+  if (faltantes.length > 0) {
+    console.log("Faltan documentos:", faltantes);
+    return;
+  }
+  
 const handleSubmit = () => {
   onNext(documentos);
 };
