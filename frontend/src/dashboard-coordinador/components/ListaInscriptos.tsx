@@ -7,6 +7,9 @@ import { Spinner } from "@/shared/components/Spinner";
 import { BadgeEstado } from "./BadgeEstado";
 import { Button } from "@/shared/components/Button";
 import DetalleLegajo from "./DetalleLegajo";
+import { api } from "@/shared/api/client";
+import type { LegajosPaginados } from "@/shared/types/types";
+import { exportarExcel } from "../utils/exportExcel";
 
 const limit = 10;
 
@@ -42,6 +45,81 @@ function ListaInscriptos() {
     error: errorCohortes,
   } = useCohortes();
   const totalPages = legajos?.totalPages ?? 1;
+
+  const handleExportarExcel = async () => {
+    try {
+      const limitExportacion = 100;
+
+      const primeraPagina = await api.get<LegajosPaginados>(
+        `/legajos?${new URLSearchParams({
+          ...(estado ? { estado } : {}),
+          ...(cohorte_id ? { cohorte_id } : {}),
+          ...(tipo_carrera ? { tipo_carrera } : {}),
+          ...(solo_con_beca ? { solo_con_beca: "true" } : {}),
+          page: "1",
+          limit: String(limitExportacion),
+        }).toString()}`,
+      );
+
+      let todosLosLegajos = [...primeraPagina.legajos];
+
+      for (let pagina = 2; pagina <= primeraPagina.totalPages; pagina++) {
+        const resultado = await api.get<LegajosPaginados>(
+          `/legajos?${new URLSearchParams({
+            ...(estado ? { estado } : {}),
+            ...(cohorte_id ? { cohorte_id } : {}),
+            ...(tipo_carrera ? { tipo_carrera } : {}),
+            ...(solo_con_beca ? { solo_con_beca: "true" } : {}),
+            page: String(pagina),
+            limit: String(limitExportacion),
+          }).toString()}`,
+        );
+
+        todosLosLegajos = [...todosLosLegajos, ...resultado.legajos];
+      }
+
+      const normalizar = (texto: string) =>
+        texto
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase();
+
+      const filtrados = todosLosLegajos.filter(
+        (legajo) =>
+          normalizar(`${legajo.apellido}${legajo.nombre}`).includes(
+            normalizar(nombre),
+          ) && legajo.dni.includes(dni),
+      );
+
+      const datos = filtrados.map((legajo) => ({
+        "Apellido y nombre": `${legajo.apellido}, ${legajo.nombre}`,
+        DNI: legajo.dni,
+        Carrera: legajo.tipo_carrera ?? "—",
+        Estado: legajo.estado,
+        Beca: legajo.solicita_beca ? `${legajo.tipo_beca}%` : "—",
+      }));
+
+      exportarExcel("reporte-inscriptos.xlsx", "Inscriptos", datos, {
+        fechaGeneracion: new Date().toLocaleString("es-AR"),
+        usuario: "Ana González",
+        filtros: {
+          Nombre: nombre || "Todos",
+          DNI: dni || "Todos",
+          Cohorte: cohorte_id || "Todas",
+          "Tipo de carrera": tipo_carrera || "Todas",
+          Estado: estado || "Todos",
+          Beca:
+            solo_con_beca === undefined
+              ? "Todos"
+              : solo_con_beca
+                ? "Con beca"
+                : "Sin beca",
+        },
+      });
+    } catch (error) {
+      console.error("Error al exportar Excel:", error);
+    }
+  };
 
   if (isLoadingLegajos || isLoadingCohortes) {
     return (
@@ -153,7 +231,11 @@ function ListaInscriptos() {
               className="sm:w-44"
             />
           </div>
-          <Button icon={Download} variant="outline">
+          <Button
+            icon={Download}
+            variant="outline"
+            onClick={handleExportarExcel}
+          >
             Exportar
           </Button>
         </div>
