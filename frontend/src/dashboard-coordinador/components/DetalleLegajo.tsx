@@ -48,6 +48,33 @@ export default function DetalleLegajo() {
     string | null
   >(null);
 
+  const handlePreviewPDF = (urlOrBase64: string) => {
+    if (!urlOrBase64) return;
+
+    let targetUrl = urlOrBase64;
+
+    if (urlOrBase64.startsWith("data:application/pdf;base64,")) {
+      try {
+        const base64Data = urlOrBase64.split(",")[1];
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "application/pdf" });
+        targetUrl = URL.createObjectURL(blob);
+
+        setTimeout(() => URL.revokeObjectURL(targetUrl), 60000);
+      } catch (err) {
+        console.error("Error al procesar el PDF para vista previa:", err);
+        return;
+      }
+    }
+
+    window.open(targetUrl, "_blank");
+  };
+
   if (isLoadingLegajo || isLoadingDocumentos || isLoadingTrabajo) {
     return (
       <div className="flex items-center gap-2 p-6 text-ink-secondary">
@@ -258,7 +285,15 @@ export default function DetalleLegajo() {
                       className="shrink-0"
                       onClick={() => setDocSeleccionado(doc)}
                     >
-                      Visualizar
+                      Observar
+                    </Button>
+                    <Button
+                      type="button"
+                      icon={Eye}
+                      variant="outline"
+                      onClick={() => handlePreviewPDF(doc.url || doc.fileUrl)}
+                    >
+                      Vista previa
                     </Button>
                   )}
                 </div>
@@ -331,6 +366,7 @@ export default function DetalleLegajo() {
         )}
         {legajo && <Workflow legajo={legajo} />}
       </div>
+      
       <AltaTrabajoFinalModal
         isOpen={legajoParaTrabajoFinal !== null}
         legajoId={legajoParaTrabajoFinal ?? ""}
