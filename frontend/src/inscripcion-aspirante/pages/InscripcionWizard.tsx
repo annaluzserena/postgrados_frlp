@@ -17,6 +17,10 @@ import {
   type Legajo,
   type TipoDocumento,
 } from "../../shared/types/types.ts";
+import { useEstadoInscripcionVigente } from "../hooks/useEstados.ts";
+import { formatFecha } from "@/shared/hooks/usePeriodos.ts";
+import { Spinner } from "@/shared/components/Spinner.tsx";
+import ThemeToggle from "@/shared/components/ThemeToggle.tsx";
 
 const STEPS: Step[] = [
   { id: "personales", label: "Personales" },
@@ -160,6 +164,40 @@ export function InscripcionWizard() {
       setCurrentStep((step) => Math.min(step + 1, STEPS.length - 1));
     },
   });
+
+  const { data: estado, isLoading } = useEstadoInscripcionVigente();
+ 
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 p-6 text-ink-secondary">
+        <Spinner size="sm" /> Verificando período de inscripción…
+      </div>
+    );
+  }
+ 
+  if (!estado?.abierto) {
+    const hoy = new Date().toISOString().slice(0, 10);
+    return (
+      <div className="screen-shell relative">
+      <div className="absolute top-4 right-4">
+          <ThemeToggle />
+        </div>
+      <div className="mx-auto max-w-md rounded-xl border border-line bg-paper-surface p-6 text-center relative">
+        <p className="text-sm font-medium text-ink">Las inscripciones están cerradas.</p>
+        {estado?.periodo?.fecha_cierra && estado?.periodo?.fecha_cierra < hoy && (
+          <p className="mt-1 text-xs text-ink-muted">
+            El último período cerró el {formatFecha(estado.periodo.fecha_cierra)}.
+          </p>
+        )}
+        {estado?.periodo?.fecha_abre && estado?.periodo?.fecha_abre > hoy && (
+          <p className="mt-1 text-xs text-ink-muted">
+            El próximo período abre: {formatFecha(estado.periodo.fecha_abre)}.
+          </p>
+        )}
+      </div>
+      </div>
+    );
+  } 
 
   const goToNextStep = () => {
     setCurrentStep((step) => Math.min(step + 1, STEPS.length - 1));

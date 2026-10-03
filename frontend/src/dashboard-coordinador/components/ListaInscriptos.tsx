@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Eye, Download, Search, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Eye, Download, Search } from "lucide-react";
 import type { EstadoLegajo, TipoCarrera } from "@/shared/types/types";
 import { useLegajos } from "../hooks/useLegajos";
 import { useCohortes } from "../hooks/useCohortes";
 import { Spinner } from "@/shared/components/Spinner";
 import { BadgeEstado } from "./BadgeEstado";
 import { Button } from "@/shared/components/Button";
-import DetalleLegajo from "./DetalleLegajo";
 
 const limit = 10;
 
@@ -20,7 +20,6 @@ function ListaInscriptos() {
     undefined,
   );
   const [page, setPage] = useState(1);
-  const [inscripto, setInscripto] = useState<string | undefined>(undefined);
   const {
     data: legajos,
     isLoading: isLoadingLegajos,
@@ -42,10 +41,11 @@ function ListaInscriptos() {
     error: errorCohortes,
   } = useCohortes();
   const totalPages = legajos?.totalPages ?? 1;
+  const navigate = useNavigate();
 
   if (isLoadingLegajos || isLoadingCohortes) {
     return (
-      <div className="flex items-center gap-2 p-6 text-ink-secondary">
+      <div className="flex items-center gap-2 p-6 text-ink-secondary screen-shell relative">
         <Spinner size="sm" /> Cargando…
       </div>
     );
@@ -63,17 +63,6 @@ function ListaInscriptos() {
           `No se pudieron cargar los cohortes: ${(errorCohortes as Error).message}`}
       </div>
     );
-  }
-
-  if (inscripto) {
-    return (
-    <>
-      <Button icon={ArrowLeft} variant="ghost" onClick={() => setInscripto(undefined)}>
-        Volver
-      </Button>
-      <DetalleLegajo id={inscripto} />
-    </>
-    )
   }
 
   const legajosFiltrados = legajos?.legajos.filter(
@@ -201,14 +190,14 @@ function ListaInscriptos() {
             value={solo_con_beca === undefined ? "" : String(solo_con_beca)}
             onChange={(e) => {
               const v = e.target.value;
-              setBeca(v === "" ? undefined : v === "true");
+              console.log(v);
+              setBeca(v === "" ? undefined : true);
               setPage(1);
             }}
             className="!py-1.5 text-xs"
           >
             <option value="">Beca</option>
             <option value="true">Con beca</option>
-            <option value="false">Sin beca</option>
           </select>
         </div>
 
@@ -248,7 +237,9 @@ function ListaInscriptos() {
                     <Button
                       icon={Eye}
                       variant="ghost"
-                      onClick={() => setInscripto(legajo.id)}
+                      onClick={() =>
+                        navigate(`${legajo.id}`, { relative: "route" })
+                      }
                     >
                       Ver legajo
                     </Button>
