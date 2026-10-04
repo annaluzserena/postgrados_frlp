@@ -65,8 +65,8 @@ export default function LoginScreen() {
             value={contrasena}
             onChange={(e) => setContrasena(e.target.value)}
           />
-          <Link to="/dashboard" className="text-center">
-          <Button type="submit">Ingresar</Button>
+          <Link to="/panel" className="text-center" >
+            <Button type="submit">Ingresar</Button>
           </Link>
 
           <a

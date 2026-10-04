@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  Workflow.tsx  (versión final)
+//  Workflow.tsx  (versión limpia)
 //  - US-CORE-004: bloquea si faltan docs
 //  - US-C-004: notificación si pasa a ROJO
 //  - Botones con funcionalidad real
@@ -79,12 +79,11 @@ export const Workflow = ({ legajo, documentos }: WorkflowProps) => {
     },
   ];
 
-  const doneCount       = steps.filter(s => s.status === "done").length;
-  const progressPercent = (doneCount / (steps.length - 1)) * 100;
+  const doneCount       = steps.filter((s) => s.status === "done").length;
+  const progressPercent = Math.min((doneCount / (steps.length - 1)) * 100, 100);
 
   return (
     <div className="space-y-5">
-
       {/* Leyenda */}
       <div className="flex flex-wrap gap-4 text-xs text-ink-secondary">
         <span className="flex items-center gap-1.5">
@@ -128,7 +127,10 @@ export const Workflow = ({ legajo, documentos }: WorkflowProps) => {
       </div>
 
       <p className="text-xs text-ink-muted">
-        Estado actual: <strong className="text-ink">{legajo.estado}</strong>
+        Estado actual:{" "}
+        <strong className="text-ink">
+          {legajo.estado.replaceAll("_", " ")}
+        </strong>
       </p>
 
       {/* Aviso bloqueo US-CORE-004 */}
@@ -151,7 +153,6 @@ export const Workflow = ({ legajo, documentos }: WorkflowProps) => {
 
       {/* Acciones */}
       <div className="flex flex-wrap gap-2">
-
         {/* Siguiente estado */}
         {haySiguiente && (
           <Button
@@ -192,7 +193,6 @@ export const Workflow = ({ legajo, documentos }: WorkflowProps) => {
             {devolver.isPending ? "Guardando…" : "Devolver"}
           </Button>
         )}
-
       </div>
     </div>
   );

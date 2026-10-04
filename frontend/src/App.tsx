@@ -1,30 +1,52 @@
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Dashboard from './dashboard-coordinador/pages/Dashboard';
 import LoginScreen from "./Login/pages/Login";
 import WelcomeScreen from "./Login/pages/WelcomeScreen";
-import Alerta from "./AlertasNotificaciones/pages/Alerta";
+import { ConsultarEstado } from "./inscripcion-aspirante/pages/ConsultarEstado";
 import NotFound from "./shared/pages/NotFound";
+import InscripcionWizard from "./inscripcion-aspirante/pages/InscripcionWizard";
+import { UserContext } from "./shared/context/UserContext.ts";
+import type { User } from "./shared/types/types.ts";
+import  Dashboard  from "./dashboard-coordinador/pages/Dashboard";
+
 
 export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/">
-          <Route index element={<LoginScreen />}/>
-          <Route path="dashboard" element={<Dashboard />}/>
-          <Route path="welcome" element={<WelcomeScreen />}/>
-          <Route path="inscripcion"/>
-          <Route path="notificacion" element={<Alerta />}/>
-          <Route path="*" element={<NotFound />}/>
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  );
-} 
 
-  /*import  Alerta from "./AlertasNotificaciones/pages/Alerta"
-     export default function App() {
-         return (
-        <Alerta/>
-         );
-     }*/
+  const currentUser: User = {
+    nombre: "Ana González",
+    rol: "cpr",
+    email: "ana@ejemplo.com",
+    password_hash: "",
+    password_plano: "",
+    activo: true,
+  };
+
+  return (
+    <UserContext.Provider value={currentUser}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/">
+            <Route index element={<LoginScreen />} />
+            <Route path="panel" element={<Dashboard path="/panel" />} />
+            <Route
+              path="inscriptos"
+              element={<Dashboard path="/inscriptos" />}
+            />
+            <Route
+              path="notificaciones"
+              element={
+                <Dashboard path="/notificaciones"
+               />
+              }
+            />
+            <Route path="inscriptos/:id" element={<Dashboard path="/:id" />} />
+            <Route path="welcome" element={<WelcomeScreen />} />
+            <Route path="consultar" element={<ConsultarEstado />} />
+            <Route path="inscripcion" element={<InscripcionWizard />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </UserContext.Provider>
+  );
+}
