@@ -39,6 +39,7 @@ export default function App() {
                />
               }
             />
+            <Route path="riesgo" element={<Dashboard path="/riesgo" />} />
             <Route path="inscriptos/:id" element={<Dashboard path="/:id" />} />
             <Route path="welcome" element={<WelcomeScreen />} />
             <Route path="consultar" element={<ConsultarEstado />} />

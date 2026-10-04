@@ -11,6 +11,7 @@ import {
   Newspaper,
   BookOpen,
   Bell,
+  AlertTriangle,
 } from "lucide-react";
 import type { MenuItem } from "@/shared/types/types";
 

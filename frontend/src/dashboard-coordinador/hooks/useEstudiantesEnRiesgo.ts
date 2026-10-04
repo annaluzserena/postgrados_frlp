@@ -4,19 +4,6 @@ import { useQuery } from "@tanstack/react-query";
  * US-C-003 — Dashboard de estudiantes en riesgo
  *
  * Hook de datos para el listado de estudiantes en riesgo académico.
- * Por ahora devuelve datos mock (no hay endpoint real todavía).
- * Cuando exista, reemplazar `fetchEstudiantesMock` por una llamada
- * real usando el cliente de `@/shared/api`, por ejemplo:
- *
- *   import { api } from "@/shared/api/client";
- *   const fetchEstudiantes = () =>
- *     api.get<EstudianteRiesgo[]>("/coordinador/estudiantes").then((r) => r.data);
- *
- * y usarla en el queryFn de abajo. El resto del componente no cambia:
- * el filtro por estado "rojo" y el orden por criticidad quedan en
- * EstudiantesEnRiesgo.tsx, no acá, para que este hook siga sirviendo
- * si más adelante se necesita el listado completo (no solo rojo) en
- * otra pantalla.
  */
 
 export type EstadoSemaforo = "rojo" | "amarillo" | "verde";
@@ -33,7 +20,7 @@ export interface EstudianteRiesgo {
 }
 
 // ---------------------------------------------------------------------------
-// Mock — reemplazar por el fetch real cuando exista el endpoint
+// Mock con estudiantes en estado ROJO, AMARILLO y VERDE para simulación completa
 // ---------------------------------------------------------------------------
 
 const ESTUDIANTES_MOCK: EstudianteRiesgo[] = [
@@ -51,7 +38,7 @@ const ESTUDIANTES_MOCK: EstudianteRiesgo[] = [
     nombre: "Rocío Paredes",
     carrera: "Maestría en Gestión Industrial",
     fechaInscripcion: "2024-02-01",
-    seminariosAdeudados: 2,
+    seminariosAdeudados: 3,
     diasSinAvance: 61,
     estado: "rojo",
   },
@@ -60,9 +47,9 @@ const ESTUDIANTES_MOCK: EstudianteRiesgo[] = [
     nombre: "Federico Suárez",
     carrera: "Especialización en Ingeniería en Sistemas",
     fechaInscripcion: "2023-11-20",
-    seminariosAdeudados: 3,
-    diasSinAvance: 45,
-    estado: "rojo",
+    seminariosAdeudados: 2,
+    diasSinAvance: 25,
+    estado: "amarillo",
   },
   {
     id: "4",
@@ -70,7 +57,7 @@ const ESTUDIANTES_MOCK: EstudianteRiesgo[] = [
     carrera: "Doctorado en Ingeniería",
     fechaInscripcion: "2024-04-05",
     seminariosAdeudados: 1,
-    diasSinAvance: 12,
+    diasSinAvance: 50,
     estado: "amarillo",
   },
   {
@@ -85,13 +72,8 @@ const ESTUDIANTES_MOCK: EstudianteRiesgo[] = [
 ];
 
 function fetchEstudiantesMock(): Promise<EstudianteRiesgo[]> {
-  // Simula latencia de red para que el estado de carga sea visible.
-  return new Promise((resolve) => setTimeout(() => resolve(ESTUDIANTES_MOCK), 400));
+  return new Promise((resolve) => setTimeout(() => resolve(ESTUDIANTES_MOCK), 200));
 }
-
-// ---------------------------------------------------------------------------
-// Hook
-// ---------------------------------------------------------------------------
 
 export function useEstudiantesEnRiesgo() {
   const query = useQuery({
