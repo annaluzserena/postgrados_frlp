@@ -11,6 +11,7 @@ import EstudiantesEnRiesgoPage from "./EstudiantesEnRiesgoPage";
 import Alerta from "@/AlertasNotificaciones/pages/Alerta";
 import type { Notificacion } from "@/AlertasNotificaciones/types/notificacion.types";
 import { NotificationsButton } from "@/shared/components/NotificationsButton";
+import { Desgranamiento } from "../components/Desgranamiento";
 
 
 
@@ -57,6 +58,7 @@ export function Dashboard({ path }: { path: string }) {
           />
         )}
         {path === "/panel" && <Panel />}
+        {path === "/estadisticas" && <Desgranamiento />}
         {path === "/inscriptos" && <ListaInscriptos />}
         {path === "/:id" && <DetalleLegajo />}
         {path === "/seminarios" && <ListaSeminarios />}

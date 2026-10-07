@@ -29,6 +29,10 @@ export default function App() {
             <Route index element={<LoginScreen />} />
             <Route path="panel" element={<Dashboard path="/panel" />} />
             <Route
+              path="estadisticas"
+              element={<Dashboard path="/estadisticas" />}
+            />
+            <Route
               path="inscriptos"
               element={<Dashboard path="/inscriptos" />}
             />
