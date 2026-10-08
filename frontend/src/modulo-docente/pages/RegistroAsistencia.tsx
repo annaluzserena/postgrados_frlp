@@ -1,115 +1,55 @@
 import { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { TablaAsistencia } from "../components/TablaAsistencia";
-import type { Alumno, Clase, PorcentajeAsistencia } from "../../shared/types/types.ts";
+import type { PorcentajeAsistencia } from "../../shared/types/types.ts";
 import { calcularPorcentaje } from "../../shared/types/types.ts";
+import {
+  useAlumnosSeminario,
+  useClasesSeminario,
+  useCrearClase,
+  useActualizarAsistencia,
+} from "../hooks/useAsistencia";
 
 // TODO: reemplazar por el seminario real seleccionado (contexto, ruta, o prop)
 const SEMINARIO_ID = "seminario-demo";
 
-async function fetchAlumnos(): Promise<Alumno[]> {
-  const res = await fetch(`/api/v1/seminarios/${SEMINARIO_ID}/alumnos`);
-  if (!res.ok) throw new Error("No se pudieron cargar los alumnos.");
-  return res.json();
-}
-
-async function fetchClases(): Promise<Clase[]> {
-  const res = await fetch(`/api/v1/seminarios/${SEMINARIO_ID}/clases`);
-  if (!res.ok) throw new Error("No se pudieron cargar las clases.");
-  return res.json();
-}
-
-async function crearClase(fecha: string): Promise<Clase> {
-  const res = await fetch(`/api/v1/seminarios/${SEMINARIO_ID}/clases`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fecha }),
-  });
-  if (!res.ok) throw new Error("No se pudo crear la clase.");
-  return res.json();
-}
-
-async function actualizarAsistencia(
-  claseId: string,
-  alumnoId: string,
-  presente: boolean
-): Promise<Clase> {
-  const res = await fetch(`/api/v1/clases/${claseId}/asistencia`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ alumnoId, presente }),
-  });
-  if (!res.ok) throw new Error("No se pudo guardar la asistencia.");
-  return res.json();
-}
-
 export function RegistroAsistencia() {
-  const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
 
-  const { data: alumnos = [], isLoading: loadingAlumnos } = useQuery({
-    queryKey: ["alumnos", SEMINARIO_ID],
-    queryFn: fetchAlumnos,
-  });
-
-  const { data: clases = [], isLoading: loadingClases } = useQuery({
-    queryKey: ["clases", SEMINARIO_ID],
-    queryFn: fetchClases,
-  });
-
-  const crearClaseMutation = useMutation({
-    mutationFn: crearClase,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clases", SEMINARIO_ID] });
-    },
-    onError: () => setError("No se pudo crear la clase. Intentá nuevamente."),
-  });
-
-  const asistenciaMutation = useMutation({
-    mutationFn: ({
-      claseId,
-      alumnoId,
-      presente,
-    }: {
-      claseId: string;
-      alumnoId: string;
-      presente: boolean;
-    }) => actualizarAsistencia(claseId, alumnoId, presente),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clases", SEMINARIO_ID] });
-    },
-    onError: () => setError("No se pudo guardar el cambio. Intentá nuevamente."),
-  });
+  const { data: alumnos = [], isLoading: loadingAlumnos } = useAlumnosSeminario(SEMINARIO_ID);
+  const { data: clases = [], isLoading: loadingClases } = useClasesSeminario(SEMINARIO_ID);
+  const crearClaseMutation = useCrearClase(SEMINARIO_ID);
+  const asistenciaMutation = useActualizarAsistencia(SEMINARIO_ID);
 
   const handleNuevaClase = () => {
     const hoy = new Date().toISOString().slice(0, 10);
     setError(null);
-    crearClaseMutation.mutate(hoy);
+    crearClaseMutation.mutate(hoy, {
+      onError: () => setError("No se pudo crear la clase. Intentá nuevamente."),
+    });
   };
 
   const handleToggleAsistencia = (
     claseId: string,
-    alumnoId: string,
+    legajoId: string,
     presenteActual: boolean
   ) => {
     setError(null);
-    asistenciaMutation.mutate({
-      claseId,
-      alumnoId,
-      presente: !presenteActual,
-    });
+    asistenciaMutation.mutate(
+      { claseId, legajoId, presente: !presenteActual },
+      { onError: () => setError("No se pudo guardar el cambio. Intentá nuevamente.") }
+    );
   };
 
   // Calcula el porcentaje de cada alumno en tiempo real:
   // (clases presente / total clases dictadas) * 100
   const porcentajes: PorcentajeAsistencia[] = useMemo(() => {
     const totalClases = clases.length;
-    return alumnos.map((alumno) => {
+    return alumnos.map((legajo) => {
       const clasesPresente = clases.filter((clase) =>
-        clase.asistencias.some((a) => a.alumnoId === alumno.id && a.presente)
+        clase.asistencias.some((a) => a.legajoId === legajo.id && a.presente)
       ).length;
       return {
-        alumnoId: alumno.id,
+        legajoId: legajo.id,
         clasesPresente,
         totalClases,
         porcentaje: calcularPorcentaje(clasesPresente, totalClases),

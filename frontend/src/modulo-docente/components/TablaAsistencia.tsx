@@ -1,10 +1,10 @@
-import type { Alumno, Clase, PorcentajeAsistencia } from "../../shared/types/types.ts";
+import type { Legajo, Clase, PorcentajeAsistencia } from "../../shared/types/types.ts";
 
 interface TablaAsistenciaProps {
-  alumnos: Alumno[];
+  alumnos: Legajo[];
   clases: Clase[];
   porcentajes: PorcentajeAsistencia[];
-  onToggleAsistencia: (claseId: string, alumnoId: string, presenteActual: boolean) => void;
+  onToggleAsistencia: (claseId: string, legajoId: string, presenteActual: boolean) => void;
   disabled?: boolean;
 }
 
@@ -31,7 +31,7 @@ export function TablaAsistencia({
         </thead>
         <tbody>
           {alumnos.map((alumno) => {
-            const porcentaje = porcentajes.find((p) => p.alumnoId === alumno.id);
+            const porcentaje = porcentajes.find((p) => p.legajoId === alumno.id);
             return (
               <tr key={alumno.id} className="border-b border-line last:border-b-0">
                 <td className="px-4 py-3 text-ink">
@@ -39,7 +39,7 @@ export function TablaAsistencia({
                 </td>
                 {clases.map((clase) => {
                   const asistencia = clase.asistencias.find(
-                    (a) => a.alumnoId === alumno.id
+                    (a) => a.legajoId === alumno.id
                   );
                   const presente = asistencia?.presente ?? false;
                   return (

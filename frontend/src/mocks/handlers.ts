@@ -2,7 +2,7 @@ import { http, HttpResponse, delay } from "msw";
 import { legajosFixture } from "./data/legajos";
 import { cohortesFixture } from "./data/cohortes";
 import { seminariosFixture } from "./data/seminarios";
-import { alumnosFixture, clasesFixture } from "./data/clases";
+import { clasesFixture } from "./data/clases";
 import type {
   CrearLegajoRequest,
   EstadoLegajo,
@@ -38,6 +38,12 @@ function errorResponse(
     },
     { status },
   );
+}
+
+// Alumnos de un seminario = legajos activos.
+// TODO: filtrar también por la cohorte del seminario cuando Seminario tenga cohorte_id
+function getAlumnosDelSeminario(_seminarioId: string): Legajo[] {
+  return legajos.filter((l) => l.estado === "ACTIVO");
 }
 
 export const handlers = [
@@ -222,9 +228,9 @@ export const handlers = [
   }),
 
   // GET /api/v1/seminarios/:seminarioId/alumnos
-  http.get("/api/v1/seminarios/:seminarioId/alumnos", async () => {
+  http.get("/api/v1/seminarios/:seminarioId/alumnos", async ({ params }) => {
     await randomDelay();
-    return HttpResponse.json(alumnosFixture);
+    return HttpResponse.json(getAlumnosDelSeminario(params.seminarioId as string));
   }),
 
   // GET /api/v1/seminarios/:seminarioId/clases
@@ -240,13 +246,14 @@ export const handlers = [
   http.post("/api/v1/seminarios/:seminarioId/clases", async ({ params, request }) => {
     await randomDelay();
     const body = (await request.json()) as { fecha: string };
+    const seminarioId = params.seminarioId as string;
 
     const nuevaClase: Clase = {
       id: `clase-${Date.now()}`,
-      seminarioId: params.seminarioId as string,
+      seminarioId,
       fecha: body.fecha,
-      asistencias: alumnosFixture.map((a) => ({
-        alumnoId: a.id,
+      asistencias: getAlumnosDelSeminario(seminarioId).map((l) => ({
+        legajoId: l.id,
         presente: false,
       })),
     };
@@ -255,24 +262,27 @@ export const handlers = [
     return HttpResponse.json(nuevaClase, { status: 201 });
   }),
 
-  // PATCH /api/v1/clases/:claseId/asistencia
-  http.patch("/api/v1/clases/:claseId/asistencia", async ({ params, request }) => {
+  // PATCH /api/v1/seminarios/:seminarioId/asistencias
+  http.patch("/api/v1/seminarios/:seminarioId/asistencias", async ({ params, request }) => {
     await randomDelay();
     const body = (await request.json()) as {
-      alumnoId: string;
+      claseId: string;
+      legajoId: string;
       presente: boolean;
     };
 
-    const clase = clases.find((c) => c.id === params.claseId);
+    const clase = clases.find(
+      (c) => c.id === body.claseId && c.seminarioId === params.seminarioId,
+    );
     if (!clase) {
       return errorResponse(404, "NOT_FOUND", "Clase no encontrada");
     }
 
-    const asistencia = clase.asistencias.find(
-      (a) => a.alumnoId === body.alumnoId,
-    );
+    const asistencia = clase.asistencias.find((a) => a.legajoId === body.legajoId);
     if (asistencia) {
       asistencia.presente = body.presente;
+    } else {
+      clase.asistencias.push({ legajoId: body.legajoId, presente: body.presente });
     }
 
     return HttpResponse.json(clase);

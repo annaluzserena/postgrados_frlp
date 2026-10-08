@@ -267,7 +267,7 @@ export interface Alumno {
 }
 
 export interface RegistroAsistenciaAlumno {
-  alumnoId: string;
+  legajoId: string;
   presente: boolean;
 }
 
@@ -279,7 +279,7 @@ export interface Clase {
 }
 
 export interface PorcentajeAsistencia {
-  alumnoId: string;
+  legajoId: string;
   clasesPresente: number;
   totalClases: number;
   porcentaje: number; // (clasesPresente / totalClases) * 100
