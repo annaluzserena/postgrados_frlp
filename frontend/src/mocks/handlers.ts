@@ -2,12 +2,14 @@ import { http, HttpResponse, delay } from "msw";
 import { legajosFixture } from "./data/legajos";
 import { cohortesFixture } from "./data/cohortes";
 import { seminariosFixture } from "./data/seminarios";
+import { clasesFixture } from "./data/clases";
 import type {
   CrearLegajoRequest,
   EstadoLegajo,
   Legajo,
   Cohorte,
   Seminario,
+  Clase,
 } from "@/shared/types/types";
 import { actualizarDocumento, getDocumentosPorLegajo } from "./data/documentos";
 import {
@@ -40,6 +42,7 @@ let trabajosFinales: TrabajoFinal[] = [{
 let legajos: Legajo[] = [...legajosFixture];
 const cohortes: Cohorte[] = [...cohortesFixture];
 const seminarios: Seminario[] = [...seminariosFixture];
+let clases: Clase[] = [...clasesFixture];
 
 const LATENCIA_MS = { min: 300, max: 800 };
 const randomDelay = () =>
@@ -61,6 +64,12 @@ function errorResponse(
     },
     { status },
   );
+}
+
+// Alumnos de un seminario = legajos activos.
+// TODO: filtrar también por la cohorte del seminario cuando Seminario tenga cohorte_id
+function getAlumnosDelSeminario(_seminarioId: string): Legajo[] {
+  return legajos.filter((l) => l.estado === "ACTIVO");
 }
 
 export const handlers = [
@@ -465,5 +474,66 @@ http.get("/api/v1/estadisticas/cohortes", async ({ request }) => {
       limit,
       totalPages,
     });
+  }),
+
+  // GET /api/v1/seminarios/:seminarioId/alumnos
+  http.get("/api/v1/seminarios/:seminarioId/alumnos", async ({ params }) => {
+    await randomDelay();
+    return HttpResponse.json(getAlumnosDelSeminario(params.seminarioId as string));
+  }),
+
+  // GET /api/v1/seminarios/:seminarioId/clases
+  http.get("/api/v1/seminarios/:seminarioId/clases", async ({ params }) => {
+    await randomDelay();
+    const resultado = clases.filter(
+      (c) => c.seminarioId === params.seminarioId,
+    );
+    return HttpResponse.json(resultado);
+  }),
+
+  // POST /api/v1/seminarios/:seminarioId/clases
+  http.post("/api/v1/seminarios/:seminarioId/clases", async ({ params, request }) => {
+    await randomDelay();
+    const body = (await request.json()) as { fecha: string };
+    const seminarioId = params.seminarioId as string;
+
+    const nuevaClase: Clase = {
+      id: `clase-${Date.now()}`,
+      seminarioId,
+      fecha: body.fecha,
+      asistencias: getAlumnosDelSeminario(seminarioId).map((l) => ({
+        legajoId: l.id,
+        presente: false,
+      })),
+    };
+    clases = [...clases, nuevaClase];
+
+    return HttpResponse.json(nuevaClase, { status: 201 });
+  }),
+
+  // PATCH /api/v1/seminarios/:seminarioId/asistencias
+  http.patch("/api/v1/seminarios/:seminarioId/asistencias", async ({ params, request }) => {
+    await randomDelay();
+    const body = (await request.json()) as {
+      claseId: string;
+      legajoId: string;
+      presente: boolean;
+    };
+
+    const clase = clases.find(
+      (c) => c.id === body.claseId && c.seminarioId === params.seminarioId,
+    );
+    if (!clase) {
+      return errorResponse(404, "NOT_FOUND", "Clase no encontrada");
+    }
+
+    const asistencia = clase.asistencias.find((a) => a.legajoId === body.legajoId);
+    if (asistencia) {
+      asistencia.presente = body.presente;
+    } else {
+      clase.asistencias.push({ legajoId: body.legajoId, presente: body.presente });
+    }
+
+    return HttpResponse.json(clase);
   }),
 ];

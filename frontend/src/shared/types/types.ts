@@ -313,6 +313,37 @@ export const DATOS_DOCUMENTOS_INICIAL: DatosDocumentos = DOCUMENTOS_REQUERIDOS.r
   {} as DatosDocumentos
 );
 
+export interface Alumno {
+  id: string;
+  apellido: string;
+  nombre: string;
+}
+
+export interface RegistroAsistenciaAlumno {
+  legajoId: string;
+  presente: boolean;
+}
+
+export interface Clase {
+  id: string;
+  seminarioId: string;
+  fecha: string; // ISO date
+  asistencias: RegistroAsistenciaAlumno[];
+}
+
+export interface PorcentajeAsistencia {
+  legajoId: string;
+  clasesPresente: number;
+  totalClases: number;
+  porcentaje: number; // (clasesPresente / totalClases) * 100
+}
+
+export function calcularPorcentaje(
+  clasesPresente: number,
+  totalClases: number
+): number {
+  if (totalClases === 0) return 0;
+  return Math.round((clasesPresente / totalClases) * 100);
 export type TipoTrabajoFinal = "TFI" | "Maestria" | "Doctorado";
  
 export interface TrabajoFinal {
