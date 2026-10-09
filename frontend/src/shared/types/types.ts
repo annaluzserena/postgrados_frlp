@@ -60,6 +60,13 @@ export interface Cohorte {
   fecha_inicio: string | null;
 }
 
+export interface PeriodoInscripcion {
+  id: string;
+  cohorte_id: string;
+  fecha_abre: string;
+  fecha_cierra: string | null;
+}
+
 export interface Seminario {
   id: string;
   nombre: string;
@@ -87,6 +94,7 @@ export interface Legajo {
     pais: string;
   };
   titulo_grado: string;
+  titulo_posgrado?: string;
   motivacion: string;
   estado: EstadoLegajo;
   tipo_carrera: TipoCarrera | null;
@@ -110,6 +118,16 @@ export type TipoDocumento =
   | "FORM_BECA"
   | "TITULO_POSGRADO";
 
+export const ETIQUETA_TIPO: Record<TipoDocumento, string> = {
+  DNI: "DNI",
+  TITULO_GRADO: "Título de grado",
+  PARTIDA: "Partida de nacimiento",
+  CUIT_CUIL: "Constancia de CUIT/CUIL",
+  FORM_INSCRIPCION: "Formulario de inscripción",
+  FORM_BECA: "Formulario de solicitud de beca",
+  TITULO_POSGRADO: "Título de posgrado",
+};
+
 export interface Documento {
   id: string;
   legajo_id: string;
@@ -117,6 +135,24 @@ export interface Documento {
   nombre_original: string;
   tamanio_bytes: number;
   fecha_subida: string;
+}
+
+export type EstadoDocumento = "PENDIENTE_REVISION" | "APROBADO" | "OBSERVADO" | "FALTANTE";
+ 
+export interface DocumentoConEstado extends Documento {
+  estado: EstadoDocumento;
+  motivo_observacion?: string; // solo si estado === "OBSERVADO"
+}
+ 
+// Respuesta de la consulta pública (sin login) de estado de inscripción
+export interface ConsultaLegajoResponse {
+  id: string;
+  numero_legajo: string | null;
+  nombre: string;
+  apellido: string;
+  estado: EstadoLegajo;
+  solicita_beca: boolean;
+  documentos: DocumentoConEstado[];
 }
 
 // Requests
@@ -222,6 +258,23 @@ export const TIPOS_CARRERA: TipoCarrera[] = [
   "Doctorado",
 ];
 
+export interface FiltrosSeminario {
+  nombre?: string;
+  docente?: string;
+  es_obligatorio?: boolean;
+  horas_catedra?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface SeminariosPaginados {
+  seminarios: Seminario[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 //Datos academicos que solicitan para inscripcion de posgrado
 export const CARRERAS_POSGRADO = [
   { value: "maestria-datos", label: "Maestría en Ciencia de Datos" },
@@ -291,4 +344,37 @@ export function calcularPorcentaje(
 ): number {
   if (totalClases === 0) return 0;
   return Math.round((clasesPresente / totalClases) * 100);
+export type TipoTrabajoFinal = "TFI" | "Maestria" | "Doctorado";
+ 
+export interface TrabajoFinal {
+  id: string;
+  legajo_id: string;
+  tipo: TipoTrabajoFinal;
+  titulo: string;
+  director: string;
+  codirector: string | null;
+  fecha_cpr: string; // "YYYY-MM-DD"
+  numero_resolucion: string;
+  creado_por: string; // email del usuario CPR que lo cargó (auditoría)
+  created_at: string;
+}
+ 
+export interface CrearTrabajoFinalRequest {
+  tipo: TipoTrabajoFinal;
+  titulo: string;
+  director: string;
+  codirector: string | null;
+  fecha_cpr: string;
+  numero_resolucion: string;
+}
+
+export interface EstadisticasCohorte {
+  cohorte_id: string;
+  cohorte_nombre: string;
+  anio: number;
+  total_inscriptos: number;
+  activos: number;
+  graduados: number;
+  en_riesgo: number;
+  dados_de_baja: number;
 }

@@ -1,4 +1,4 @@
-import type { Cohorte } from '@/shared/types/cohorte';
+import type { Cohorte } from '@/shared/types/types';
 
 export const cohortesFixture: Cohorte[] = [
   {

@@ -1,4 +1,4 @@
-import type { Seminario } from '@/shared/types/seminario';
+import type { Seminario } from '@/shared/types/types';
 
 export const seminariosFixture: Seminario[] = [
   {
