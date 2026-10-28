@@ -9,7 +9,6 @@
     "skipLibCheck": true,
 
     /* Configurar ruta base */
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },

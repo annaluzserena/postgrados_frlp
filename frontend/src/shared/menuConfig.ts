@@ -9,6 +9,7 @@ import {
   CalendarDays,
   FileText,
   Newspaper,
+  BookOpen,
 } from "lucide-react";
 import type { MenuItem } from "@/shared/types/types";
 
@@ -24,7 +25,7 @@ export const menuItems: MenuItem[] = [
     label: "Inscriptos",
     href: "/inscriptos",
     icon: Users,
-    roles: ["coordinador", "admin"],
+    roles: ["coordinador", "cpr", "admin"],
   },
   {
     id: "inscripcion",
@@ -39,6 +40,13 @@ export const menuItems: MenuItem[] = [
     href: "/estadisticas",
     icon: BarChart3,
     roles: ["coordinador", "cpr", "admin"],
+  },
+  {
+    id: "seminarios",
+    label: "Seminarios",
+    href: "/seminarios",
+    icon: BookOpen,
+    roles: ["coordinador", "admin"],
   },
   {
     id: "consultas",
@@ -66,5 +74,5 @@ export const menuItems: MenuItem[] = [
     label: "Noticias",
     href: "/noticias",
     icon: Newspaper,
-  }
+  },
 ];
