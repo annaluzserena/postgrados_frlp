@@ -1,16 +1,6 @@
 import { useState } from 'react';
-import { Sidebar } from '@/shared/components/Sidebar';
-import { menuItems } from '@/shared/menuConfig';
-import type { User } from '@/shared/types/types';
 import { NotificationsButton } from '../../shared/components/NotificationsButton';
 import { NotificacionCard, type Notificacion } from '../components/NotificacionCard';
-
-const currentUser: User = {
-  id: 'u1',
-  nombre: 'Ana González',
-  rol: 'coordinador',
-  email: 'ana@ejemplo.com',
-};
 
 const mockNotificaciones: Notificacion[] = [
   {
@@ -44,7 +34,6 @@ const mockNotificaciones: Notificacion[] = [
 ];
 
 export default function Alerta() {
-  const [currentPath, setCurrentPath] = useState('/notificaciones');
   const [notificaciones, setNotificaciones] = useState(mockNotificaciones);
 
   const handleAprobar = (id: string) => console.log('Aprobar', id);
@@ -58,12 +47,6 @@ export default function Alerta() {
 
   return (
     <div className="flex h-screen w-full bg-paper text-ink">
-      <Sidebar
-        user={currentUser}
-        items={menuItems}
-        currentPath={currentPath}
-        onNavigate={setCurrentPath}
-      />
 
       <main className="scroll-fade flex-1 overflow-y-auto px-8 py-6 transition-colors">
         <div className="mb-6 flex items-center justify-between">
