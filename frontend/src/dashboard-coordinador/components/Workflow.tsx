@@ -1,19 +1,19 @@
 // ─────────────────────────────────────────────
 //  Workflow.tsx  (versión limpia)
 //  - US-CORE-004: bloquea si faltan docs
-//  - US-C-004: notificación si pasa a ROJO
+//  - Actualización de estados mediante el hook compartido
 //  - Botones con funcionalidad real
 // ─────────────────────────────────────────────
 
-import type { Documento, Legajo } from "@/shared/types/types";
+import type { EstadoLegajo, Legajo } from "@/shared/types/types";
+import { useDocumentos } from "../hooks/useDocumentos";
 import { Button } from "@/shared/components/Button";
 import { Check, ArrowLeft, Lock } from "lucide-react";
 import { useFaltanDocs } from "./SeccionDocumentos";
-import { useAvanzarEstado, useDevolverEstado, siguienteEstado } from "../hooks/useAvanzarEstado";
+import { useActualizarEstado } from "@/shared/hooks/useEstado";
 
 interface WorkflowProps {
   legajo:     Legajo;
-  documentos: Documento[];
 }
 
 type StepStatus = "done" | "active" | "pending";
@@ -32,13 +32,34 @@ const LABEL_SIGUIENTE: Partial<Record<string, string>> = {
   COMPLETADO:  "Activar matrícula",
 };
 
-export const Workflow = ({ legajo, documentos }: WorkflowProps) => {
-  const faltanDocs  = useFaltanDocs(documentos, legajo.solicita_beca);
-  const bloqueado   = legajo.estado === "PENDIENTE" && faltanDocs;
-  const haySiguiente = !!siguienteEstado(legajo.estado);
+const SIGUIENTE_ESTADO: Partial<Record<EstadoLegajo, EstadoLegajo>> = {
+  BORRADOR: "PENDIENTE",
+  PENDIENTE: "EN_REVISION",
+  EN_REVISION: "COMPLETADO",
+  COMPLETADO: "ACTIVO",
+  OBSERVADO: "PENDIENTE",
+};
 
-  const avanzar  = useAvanzarEstado();
-  const devolver = useDevolverEstado();
+const ESTADO_ANTERIOR: Partial<Record<EstadoLegajo, EstadoLegajo>> = {
+  PENDIENTE: "BORRADOR",
+  EN_REVISION: "OBSERVADO",
+  COMPLETADO: "EN_REVISION",
+};
+
+export const Workflow = ({ legajo }: WorkflowProps) => {
+  const {
+    data: documentos = [],
+    isPending: cargandoDocumentos,
+    isError: errorDocumentos,
+  } = useDocumentos(legajo.id);
+
+  const faltanDocs = useFaltanDocs(documentos, legajo.solicita_beca);
+  const bloqueado =
+    legajo.estado === "PENDIENTE" &&
+    (cargandoDocumentos || errorDocumentos || faltanDocs);
+  const siguiente = SIGUIENTE_ESTADO[legajo.estado];
+  const anterior = ESTADO_ANTERIOR[legajo.estado];
+  const actualizarEstado = useActualizarEstado();
 
   const steps: { label: string; status: StepStatus }[] = [
     {
@@ -138,34 +159,35 @@ export const Workflow = ({ legajo, documentos }: WorkflowProps) => {
         <div className="flex items-start gap-2.5 rounded-xl border border-semaforo-rojo/20 bg-semaforo-rojo-soft px-4 py-3 dark:bg-semaforo-rojo-soft-dark">
           <Lock size={15} className="mt-0.5 shrink-0 text-semaforo-rojo" />
           <p className="text-xs text-semaforo-rojo">
-            No podés enviar a revisión hasta completar toda la documentación obligatoria.
-            Cargá los documentos faltantes y volvé a intentarlo.
+            {cargandoDocumentos
+              ? "Verificando la documentación obligatoria…"
+              : errorDocumentos
+                ? "No se pudo verificar la documentación. Reintentá la consulta antes de avanzar."
+                : "No podés enviar a revisión hasta completar toda la documentación obligatoria. Cargá los documentos faltantes y volvé a intentarlo."}
           </p>
         </div>
       )}
 
       {/* Error de mutation */}
-      {(avanzar.isError || devolver.isError) && (
+      {actualizarEstado.isError && (
         <div className="rounded-xl border border-semaforo-rojo/20 bg-semaforo-rojo-soft px-4 py-3 text-xs text-semaforo-rojo dark:bg-semaforo-rojo-soft-dark">
-          {((avanzar.error || devolver.error) as Error).message}
+          {actualizarEstado.error.message}
         </div>
       )}
 
       {/* Acciones */}
       <div className="flex flex-wrap gap-2">
         {/* Siguiente estado */}
-        {haySiguiente && (
+        {siguiente && (
           <Button
             variant="primary"
-            disabled={bloqueado || avanzar.isPending}
-            onClick={() =>
-              avanzar.mutate({
-                legajoId:     legajo.id,
-                estadoActual: legajo.estado,
-              })
-            }
+            disabled={bloqueado || actualizarEstado.isPending}
+            onClick={() => {
+              if (bloqueado || actualizarEstado.isPending || !siguiente) return;
+              actualizarEstado.mutate({ id: legajo.id, estado: siguiente });
+            }}
           >
-            {avanzar.isPending ? (
+            {actualizarEstado.isPending ? (
               "Guardando…"
             ) : bloqueado ? (
               <span className="flex items-center gap-2">
@@ -178,19 +200,17 @@ export const Workflow = ({ legajo, documentos }: WorkflowProps) => {
         )}
 
         {/* Devolver */}
-        {["PENDIENTE", "EN_REVISION", "COMPLETADO"].includes(legajo.estado) && (
+        {anterior && (
           <Button
             variant="outline"
             icon={ArrowLeft}
-            disabled={devolver.isPending}
-            onClick={() =>
-              devolver.mutate({
-                legajoId:     legajo.id,
-                estadoActual: legajo.estado,
-              })
-            }
+            disabled={actualizarEstado.isPending}
+            onClick={() => {
+              if (actualizarEstado.isPending || !anterior) return;
+              actualizarEstado.mutate({ id: legajo.id, estado: anterior });
+            }}
           >
-            {devolver.isPending ? "Guardando…" : "Devolver"}
+            {actualizarEstado.isPending ? "Guardando…" : "Devolver"}
           </Button>
         )}
       </div>

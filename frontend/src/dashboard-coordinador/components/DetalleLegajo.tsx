@@ -1,5 +1,5 @@
 import { useState, useContext } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useLegajo } from "../hooks/useLegajos";
 import { useDocumentos } from "../hooks/useDocumentos";
 import { useTrabajoFinal } from "../hooks/useTrabajoFinal";
@@ -17,7 +17,6 @@ import {
 import { UserContext } from "@/shared/context/UserContext";
 
 export default function DetalleLegajo({ id: idProp }: { id?: string } = {}) {
-  const navigate = useNavigate();
   const currentUser = useContext(UserContext);
   const routeParams = useParams();
   const id = idProp || routeParams.id;
@@ -333,7 +332,7 @@ export default function DetalleLegajo({ id: idProp }: { id?: string } = {}) {
         )}
 
         {/* Workflow */}
-        {legajo && <Workflow legajo={legajo} documentos={documentos ?? []} />}
+        {legajo && <Workflow legajo={legajo} />}
       </div>
 
       {currentUser && (
