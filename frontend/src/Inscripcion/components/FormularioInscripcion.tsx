@@ -1,21 +1,19 @@
-// ─────────────────────────────────────────────
-// FormularioInscripcion.tsx
-//
-// Formulario de alta de aspirante.
-//
-// US-CORE-001: campos personales + académicos
-// US-CORE-002: solicitud de beca integrada
-// US-CORE-004: base para control documental
-// ─────────────────────────────────────────────
-
 import { useState } from "react";
-import {AlertCircle,CheckCircle2, FileCheck2,Send} from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  FileCheck2,
+  Send,
+} from "lucide-react";
 import { useCohortes } from "@/dashboard-coordinador/hooks/useCohortes";
-import {  useCrearLegajo, useSubirDocumentoBeca } from "@/dashboard-coordinador/hooks/useCrearLegajo";
-import { SeccionBeca, type BecaState} from "./SeccionBeca";
+import { useInscripcion } from "@/shared/hooks/useInscripcion";
+import {
+  CARRERAS_POSGRADO,
+  CANALES_DIFUSION,
+} from "@/shared/types/types";
+import { SeccionBeca, type BecaState } from "./SeccionBeca";
 import { Spinner } from "@/shared/components/Spinner";
 import { Button } from "@/shared/components/Button";
-
 
 interface FormState {
   nombre: string;
@@ -23,14 +21,15 @@ interface FormState {
   dni: string;
   email: string;
   telefono_movil: string;
+  nacionalidad: string;
+  direccion: string;
+  pais: string;
+  carrera_elegida: string;
+  como_conocio: string;
   ciudad: string;
   provincia: string;
   titulo_grado: string;
-  tipo_carrera:
-    | "Maestria"
-    | "Especializacion"
-    | "Doctorado"
-    | "";
+  tipo_carrera: "Maestria" | "Especializacion" | "Doctorado" | "";
   cohorte_id: string;
   motivacion: string;
   beca: BecaState;
@@ -38,16 +37,10 @@ interface FormState {
 
 type FormErrors = Partial<
   Record<
-    keyof Omit<FormState, "beca"> |
-      "tipo_beca" |
-      "archivo_beca",
+    keyof Omit<FormState, "beca"> | "tipo_beca" | "archivo_beca",
     string
   >
 >;
-
-// ─────────────────────────────────────────────
-// Estado inicial
-// ─────────────────────────────────────────────
 
 const INITIAL: FormState = {
   nombre: "",
@@ -55,6 +48,11 @@ const INITIAL: FormState = {
   dni: "",
   email: "",
   telefono_movil: "",
+  nacionalidad: "",
+  direccion: "",
+  pais: "Argentina",
+  carrera_elegida: "",
+  como_conocio: "",
   ciudad: "",
   provincia: "",
   titulo_grado: "",
@@ -68,241 +66,216 @@ const INITIAL: FormState = {
   },
 };
 
-// ─────────────────────────────────────────────
-// Validación
-// ─────────────────────────────────────────────
-
 function validar(form: FormState): FormErrors {
-  const e: FormErrors = {};
+  const errores: FormErrors = {};
 
   if (!form.nombre.trim()) {
-    e.nombre = "El nombre es obligatorio.";
+    errores.nombre = "El nombre es obligatorio.";
   }
 
   if (!form.apellido.trim()) {
-    e.apellido = "El apellido es obligatorio.";
+    errores.apellido = "El apellido es obligatorio.";
   }
 
   if (!/^\d{7,8}$/.test(form.dni)) {
-    e.dni = "DNI inválido (7 u 8 dígitos).";
+    errores.dni = "DNI inválido (7 u 8 dígitos).";
   }
 
-  if (
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)
-  ) {
-    e.email = "Email inválido.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    errores.email = "Email inválido.";
   }
 
   if (!form.titulo_grado.trim()) {
-    e.titulo_grado =
-      "Ingresá tu título de grado.";
+    errores.titulo_grado = "Ingresá el título de grado.";
   }
 
   if (!form.tipo_carrera) {
-    e.tipo_carrera =
-      "Seleccioná un tipo de carrera.";
+    errores.tipo_carrera = "Seleccioná un tipo de carrera.";
   }
 
   if (!form.cohorte_id) {
-    e.cohorte_id =
-      "Seleccioná una cohorte.";
+    errores.cohorte_id = "Seleccioná una cohorte.";
   }
 
-  if (!form.motivacion.trim()) {
-    e.motivacion =
-      "Escribí tu motivación.";
+  for (const [campo, mensaje] of [
+    ["telefono_movil", "Ingresá el teléfono del aspirante."],
+    ["nacionalidad", "Ingresá la nacionalidad del aspirante."],
+    ["direccion", "Ingresá la dirección del aspirante."],
+    ["ciudad", "Ingresá la ciudad del aspirante."],
+    ["provincia", "Ingresá la provincia del aspirante."],
+    ["pais", "Ingresá el país del aspirante."],
+  ] as const) {
+    if (!form[campo].trim()) {
+      errores[campo] = mensaje;
+    }
   }
 
-  // ─────────────────────────────────────────
-  // US-CORE-002
-  // Si solicita beca:
-  // tipo + PDF son obligatorios
-  // ─────────────────────────────────────────
+  if (
+    !CARRERAS_POSGRADO.some(
+      (carrera) => carrera.value === form.carrera_elegida,
+    )
+  ) {
+    errores.carrera_elegida = "Seleccioná una carrera disponible.";
+  }
+
+  if (
+    !CANALES_DIFUSION.some(
+      (canal) => canal.value === form.como_conocio,
+    )
+  ) {
+    errores.como_conocio = "Seleccioná cómo conoció el posgrado.";
+  }
+
+  const longitudMotivacion = form.motivacion.trim().length;
+
+  if (longitudMotivacion < 50 || longitudMotivacion > 500) {
+    errores.motivacion =
+      "La motivación debe tener entre 50 y 500 caracteres.";
+  }
 
   if (form.beca.solicita_beca) {
     if (!form.beca.tipo_beca) {
-      e.tipo_beca =
-        "Seleccioná el porcentaje de beca.";
+      errores.tipo_beca = "Seleccioná el porcentaje de beca.";
     }
 
-    if (!form.beca.archivo_beca) {
-      e.archivo_beca =
+    const archivo = form.beca.archivo_beca;
+
+    if (!archivo) {
+      errores.archivo_beca =
         "El formulario de beca en PDF es obligatorio.";
+    } else if (
+      archivo.type !== "application/pdf" ||
+      archivo.size === 0 ||
+      archivo.size > 5 * 1024 * 1024
+    ) {
+      errores.archivo_beca =
+        "Adjuntá un PDF no vacío de hasta 5 MB.";
     }
   }
 
-  return e;
+  return errores;
 }
-
-// ─────────────────────────────────────────────
-// Props
-// ─────────────────────────────────────────────
 
 interface FormularioInscripcionProps {
   onExito?: () => void;
 }
 
-// ─────────────────────────────────────────────
-// Componente
-// ─────────────────────────────────────────────
-
 export function FormularioInscripcion({
   onExito,
 }: FormularioInscripcionProps) {
-  const [form, setForm] =
-    useState<FormState>(INITIAL);
-
-  const [errors, setErrors] =
-    useState<FormErrors>({});
-
-  const [enviado, setEnviado] =
-    useState(false);
+  const [form, setForm] = useState<FormState>(INITIAL);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [enviado, setEnviado] = useState(false);
 
   const {
     data: cohortes,
     isLoading: loadingCohortes,
+    isError: errorCohortes,
+    error: consultaError,
   } = useCohortes();
 
-  const crearLegajo =
-    useCrearLegajo();
+  const inscripcion = useInscripcion({ auth: true });
+  const isPending = inscripcion.isPending;
 
-  const subirBeca =
-    useSubirDocumentoBeca();
-
-  const isPending =
-    crearLegajo.isPending ||
-    subirBeca.isPending;
-
-  // ─────────────────────────────────────────
-  // Helpers
-  // ─────────────────────────────────────────
-
-  function setField<
-    K extends keyof Omit<FormState, "beca">
-  >(
+  function setField<K extends keyof Omit<FormState, "beca">>(
     key: K,
-    val: FormState[K]
+    value: FormState[K],
   ) {
-    setForm((f) => ({
-      ...f,
-      [key]: val,
+    setForm((anterior) => ({
+      ...anterior,
+      [key]: value,
     }));
 
-    setErrors((e) => ({
-      ...e,
+    setErrors((anteriores) => ({
+      ...anteriores,
       [key]: undefined,
     }));
   }
 
-  // ─────────────────────────────────────────
-  // Submit
-  // ─────────────────────────────────────────
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
 
-  async function handleSubmit(
-    e: React.FormEvent
-  ) {
-    e.preventDefault();
+    if (isPending || loadingCohortes || errorCohortes) {
+      return;
+    }
 
-    const errs = validar(form);
+    const errores = validar(form);
 
-    if (Object.keys(errs).length) {
-      setErrors(errs);
+    if (!cohortes?.some((cohorte) => cohorte.id === form.cohorte_id)) {
+      errores.cohorte_id = "Seleccioná una cohorte disponible.";
+    }
 
-      // Llevar al usuario hacia el primer error
+    if (Object.keys(errores).length > 0) {
+      setErrors(errores);
+
       window.setTimeout(() => {
-        const firstError =
-          document.querySelector(
-            ".border-semaforo-rojo"
-          );
-
-        firstError?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
+        document
+          .querySelector(".border-semaforo-rojo")
+          ?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
       }, 50);
 
       return;
     }
 
+    if (!form.tipo_carrera) {
+      return;
+    }
+
     try {
-      // ─────────────────────────────────────
-      // 1. Crear legajo
-      // ─────────────────────────────────────
-
-      const legajo =
-        await crearLegajo.mutateAsync({
-          nombre: form.nombre,
-          apellido: form.apellido,
-          dni: form.dni,
-          email: form.email,
-          telefono_movil:
-            form.telefono_movil,
-
+      await inscripcion.mutateAsync({
+        datosPersonales: {
+          nombre: form.nombre.trim(),
+          apellido: form.apellido.trim(),
+          documento: form.dni,
+          nacionalidad: form.nacionalidad.trim(),
+          email: form.email.trim(),
+          emailAlternativo: "",
+          telefonoMovil: form.telefono_movil.trim(),
+          telefonoFijo: "",
           domicilio: {
-            ciudad: form.ciudad,
-            provincia: form.provincia,
+            direccion: form.direccion.trim(),
+            ciudad: form.ciudad.trim(),
+            provincia: form.provincia.trim(),
+            pais: form.pais.trim(),
           },
-
-          titulo_grado:
-            form.titulo_grado,
-
-          tipo_carrera:
-            form.tipo_carrera as
-              | "Maestria"
-              | "Especializacion"
-              | "Doctorado",
-
-          cohorte_id:
-            form.cohorte_id,
-
-          motivacion:
-            form.motivacion,
-
-          solicita_beca:
-            form.beca.solicita_beca,
-
-          tipo_beca:
-            form.beca.tipo_beca,
-        });
-
-      // ─────────────────────────────────────
-      // 2. Subir PDF de beca
-      // ─────────────────────────────────────
-
-      if (
-        form.beca.solicita_beca &&
-        form.beca.archivo_beca
-      ) {
-        await subirBeca.mutateAsync({
-          legajoId: legajo.id,
-          archivo:
-            form.beca.archivo_beca,
-        });
-      }
+          solicitaBeca: form.beca.solicita_beca,
+          tipoBeca: form.beca.solicita_beca
+            ? form.beca.tipo_beca === 30
+              ? "30"
+              : form.beca.tipo_beca === 100
+                ? "100"
+                : undefined
+            : undefined,
+          comprobanteBeca: form.beca.solicita_beca
+            ? form.beca.archivo_beca ?? undefined
+            : undefined,
+        },
+        datosAcademicos: {
+          tituloGradoObtenido: form.titulo_grado.trim(),
+          tipoCarreras: [form.tipo_carrera],
+          carreraElegida: form.carrera_elegida,
+          canalDifusion: form.como_conocio,
+          motivaciones: form.motivacion.trim(),
+        },
+        datosDocumentos: {},
+        cohorte_id: form.cohorte_id,
+      });
 
       setEnviado(true);
-
       onExito?.();
-
-    } catch (err) {
-      console.error(
-        "Error al crear legajo:",
-        err
-      );
+    } catch (error) {
+      console.error("Error al crear legajo:", error);
     }
   }
-
-  // ─────────────────────────────────────────
-  // Pantalla de éxito
-  // ─────────────────────────────────────────
 
   if (enviado) {
     return (
       <div className="mx-auto w-full max-w-3xl">
         <div className="overflow-hidden rounded-2xl border border-line bg-paper-surface shadow-sm">
-
           <div className="flex flex-col items-center px-6 py-12 text-center sm:px-10">
-
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-semaforo-verde-soft dark:bg-semaforo-verde-soft-dark">
               <CheckCircle2
                 size={32}
@@ -311,15 +284,13 @@ export function FormularioInscripcion({
             </div>
 
             <p className="mt-5 text-xl font-bold text-ink">
-              ¡Inscripción enviada!
+              Inscripción registrada
             </p>
 
             <p className="mt-2 max-w-md text-sm leading-relaxed text-ink-secondary">
-              Tu legajo fue creado correctamente
-              y quedó registrado en estado{" "}
-              <strong className="text-ink">
-                Pendiente
-              </strong>.
+              El legajo del aspirante fue creado correctamente y
+              quedó registrado en estado{" "}
+              <strong className="text-ink">Pendiente</strong>.
             </p>
 
             {form.beca.solicita_beca && (
@@ -328,11 +299,9 @@ export function FormularioInscripcion({
                   size={18}
                   className="mt-0.5 shrink-0 text-brand-500"
                 />
-
                 <p className="text-xs leading-relaxed text-ink-secondary">
-                  Tu solicitud de beca también
-                  quedó registrada y será evaluada
-                  por el coordinador.
+                  La solicitud de beca también quedó registrada y
+                  será evaluada por el coordinador.
                 </p>
               </div>
             )}
@@ -344,20 +313,16 @@ export function FormularioInscripcion({
                 setForm(INITIAL);
                 setErrors({});
                 setEnviado(false);
+                inscripcion.reset();
               }}
             >
               Nueva inscripción
             </Button>
-
           </div>
         </div>
       </div>
     );
   }
-
-  // ─────────────────────────────────────────
-  // Formulario
-  // ─────────────────────────────────────────
 
   return (
     <form
@@ -365,143 +330,88 @@ export function FormularioInscripcion({
       noValidate
       className="mx-auto w-full max-w-6xl space-y-6"
     >
-
-      {/* ─────────────────────────────────────
-          HEADER
-      ────────────────────────────────────── */}
-
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-
         <div>
-    
           <h2 className="mt-1 text-2xl font-bold tracking-tight text-ink">
             Nueva inscripción
           </h2>
-
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-secondary">
-            Completá tus datos personales y
-            académicos para iniciar tu inscripción
-            en el programa de posgrado.
+            Completá los datos personales y académicos del aspirante
+            para registrar su inscripción en el programa de posgrado.
           </p>
         </div>
 
         <div className="shrink-0 rounded-full border border-line bg-paper-surface px-3 py-1.5 text-xs text-ink-muted">
-          <span className="text-semaforo-rojo">
-            *
-          </span>{" "}
+          <span className="text-semaforo-rojo">*</span>{" "}
           Campos obligatorios
         </div>
-
       </div>
 
-      {/* ─────────────────────────────────────
-          ERROR GLOBAL
-      ────────────────────────────────────── */}
+      {errorCohortes && (
+        <p role="alert" className="text-sm text-semaforo-rojo">
+          No se pudieron cargar las cohortes: {consultaError?.message}
+        </p>
+      )}
 
-      {crearLegajo.isError && (
+      {inscripcion.isError && (
         <div
           role="alert"
           className="flex items-start gap-3 rounded-xl border border-semaforo-rojo/20 bg-semaforo-rojo-soft p-4 text-sm text-semaforo-rojo dark:bg-semaforo-rojo-soft-dark"
         >
-          <AlertCircle
-            size={18}
-            className="mt-0.5 shrink-0"
-          />
-
+          <AlertCircle size={18} className="mt-0.5 shrink-0" />
           <div>
             <p className="font-semibold">
               No pudimos completar la inscripción
             </p>
-
             <p className="mt-1 text-xs">
-              {(crearLegajo.error as Error).message}
+              {inscripcion.error?.message}
             </p>
           </div>
         </div>
       )}
 
-      {/* ─────────────────────────────────────
-          PASO 1 — DATOS PERSONALES
-      ────────────────────────────────────── */}
-
-      <fieldset className="rounded-2xl border border-line bg-paper-surface p-5 shadow-sm sm:p-6">
-
-        <legend className="sr-only">
-          Datos personales
-        </legend>
+      <fieldset
+        disabled={isPending}
+        className="rounded-2xl border border-line bg-paper-surface p-5 shadow-sm sm:p-6"
+      >
+        <legend className="sr-only">Datos personales</legend>
 
         <div className="mb-5">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-500">
             Paso 1
           </p>
-
           <h3 className="mt-1 text-base font-semibold text-ink">
             Datos personales
           </h3>
-
           <p className="mt-1 text-xs text-ink-muted">
-            Información básica para identificar al
-            aspirante.
+            Información básica para identificar al aspirante.
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-
-          <Field
-            label="Nombre"
-            required
-            error={errors.nombre}
-          >
+          <Field label="Nombre" required error={errors.nombre}>
             <input
               type="text"
               value={form.nombre}
               placeholder="Ej: Martín"
-              onChange={(e) =>
-                setField(
-                  "nombre",
-                  e.target.value
-                )
-              }
-              className={
-                errors.nombre
-                  ? "border-semaforo-rojo"
-                  : ""
-              }
+              onChange={(e) => setField("nombre", e.target.value)}
+              className={errors.nombre ? "border-semaforo-rojo" : ""}
             />
           </Field>
 
-          <Field
-            label="Apellido"
-            required
-            error={errors.apellido}
-          >
+          <Field label="Apellido" required error={errors.apellido}>
             <input
               type="text"
               value={form.apellido}
               placeholder="Ej: García"
-              onChange={(e) =>
-                setField(
-                  "apellido",
-                  e.target.value
-                )
-              }
-              className={
-                errors.apellido
-                  ? "border-semaforo-rojo"
-                  : ""
-              }
+              onChange={(e) => setField("apellido", e.target.value)}
+              className={errors.apellido ? "border-semaforo-rojo" : ""}
             />
           </Field>
-
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-
-          <Field
-            label="DNI"
-            required
-            error={errors.dni}
-          >
+          <Field label="DNI" required error={errors.dni}>
             <input
               type="text"
               value={form.dni}
@@ -509,117 +419,109 @@ export function FormularioInscripcion({
               inputMode="numeric"
               maxLength={8}
               onChange={(e) =>
-                setField(
-                  "dni",
-                  e.target.value.replace(
-                    /\D/g,
-                    ""
-                  )
-                )
+                setField("dni", e.target.value.replace(/\D/g, ""))
               }
-              className={
-                errors.dni
-                  ? "border-semaforo-rojo"
-                  : ""
-              }
+              className={errors.dni ? "border-semaforo-rojo" : ""}
             />
           </Field>
 
-          <Field
-            label="Email"
-            required
-            error={errors.email}
-          >
+          <Field label="Email" required error={errors.email}>
             <input
               type="email"
               value={form.email}
               placeholder="tu@email.com"
-              onChange={(e) =>
-                setField(
-                  "email",
-                  e.target.value
-                )
-              }
-              className={
-                errors.email
-                  ? "border-semaforo-rojo"
-                  : ""
-              }
+              onChange={(e) => setField("email", e.target.value)}
+              className={errors.email ? "border-semaforo-rojo" : ""}
             />
           </Field>
-
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Ciudad">
+          <Field label="Ciudad" required error={errors.ciudad}>
             <input
               type="text"
               value={form.ciudad}
               placeholder="La Plata"
-              onChange={(e) =>
-                setField(
-                  "ciudad",
-                  e.target.value
-                )
-              }
+              onChange={(e) => setField("ciudad", e.target.value)}
             />
           </Field>
 
-        <Field label="Provincia">
+          <Field label="Provincia" required error={errors.provincia}>
             <input
               type="text"
               value={form.provincia}
               placeholder="Buenos Aires"
-              onChange={(e) =>
-                setField(
-                  "provincia",
-                  e.target.value
-                )
-              }
+              onChange={(e) => setField("provincia", e.target.value)}
             />
           </Field>
         </div>
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
 
-          <Field label="Teléfono">
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <Field
+            label="Teléfono"
+            required
+            error={errors.telefono_movil}
+          >
             <input
               type="tel"
               value={form.telefono_movil}
               placeholder="+54 9 221..."
               onChange={(e) =>
-                setField(
-                  "telefono_movil",
-                  e.target.value
-                )
+                setField("telefono_movil", e.target.value)
               }
             />
           </Field>
         </div>
 
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field
+            label="Nacionalidad"
+            required
+            error={errors.nacionalidad}
+          >
+            <input
+              type="text"
+              value={form.nacionalidad}
+              onChange={(e) =>
+                setField("nacionalidad", e.target.value)
+              }
+            />
+          </Field>
+
+          <Field label="País" required error={errors.pais}>
+            <input
+              type="text"
+              value={form.pais}
+              onChange={(e) => setField("pais", e.target.value)}
+            />
+          </Field>
+
+          <Field label="Dirección" required error={errors.direccion}>
+            <input
+              type="text"
+              value={form.direccion}
+              onChange={(e) => setField("direccion", e.target.value)}
+            />
+          </Field>
+        </div>
       </fieldset>
 
-      {/* ─────────────────────────────────────
-          PASO 2 — FORMACIÓN
-      ────────────────────────────────────── */}
-
-      <fieldset className="rounded-2xl border border-line bg-paper-surface p-5 shadow-sm sm:p-6">
-
-        <legend className="sr-only">
-          Formación y carrera
-        </legend>
+      <fieldset
+        disabled={isPending}
+        className="rounded-2xl border border-line bg-paper-surface p-5 shadow-sm sm:p-6"
+      >
+        <legend className="sr-only">Formación y carrera</legend>
 
         <div className="mb-5">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-500">
             Paso 2
           </p>
-
           <h3 className="mt-1 text-base font-semibold text-ink">
             Formación y carrera
           </h3>
-
           <p className="mt-1 text-xs text-ink-muted">
-            Indicá la carrera y la cohorte a la que
-            querés inscribirte.
+            Indicá la carrera y la cohorte a la que se inscribirá
+            el aspirante.
           </p>
         </div>
 
@@ -633,21 +535,15 @@ export function FormularioInscripcion({
             value={form.titulo_grado}
             placeholder="Ej: Ingeniero en Sistemas"
             onChange={(e) =>
-              setField(
-                "titulo_grado",
-                e.target.value
-              )
+              setField("titulo_grado", e.target.value)
             }
             className={
-              errors.titulo_grado
-                ? "border-semaforo-rojo"
-                : ""
+              errors.titulo_grado ? "border-semaforo-rojo" : ""
             }
           />
         </Field>
 
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-
           <Field
             label="Tipo de carrera"
             required
@@ -658,70 +554,83 @@ export function FormularioInscripcion({
               onChange={(e) =>
                 setField(
                   "tipo_carrera",
-                  e.target.value as FormState["tipo_carrera"]
+                  e.target.value as FormState["tipo_carrera"],
                 )
               }
               className={
-                errors.tipo_carrera
-                  ? "border-semaforo-rojo"
-                  : ""
+                errors.tipo_carrera ? "border-semaforo-rojo" : ""
               }
             >
-              <option value="">
-                Seleccioná…
-              </option>
-
-              <option value="Maestria">
-                Maestría
-              </option>
-
-              <option value="Especializacion">
-                Especialización
-              </option>
-
-              <option value="Doctorado">
-                Doctorado
-              </option>
+              <option value="">Seleccioná…</option>
+              <option value="Maestria">Maestría</option>
+              <option value="Especializacion">Especialización</option>
+              <option value="Doctorado">Doctorado</option>
             </select>
           </Field>
 
-          <Field
-            label="Cohorte"
-            required
-            error={errors.cohorte_id}
-          >
+          <Field label="Cohorte" required error={errors.cohorte_id}>
             <select
               value={form.cohorte_id}
               onChange={(e) =>
-                setField(
-                  "cohorte_id",
-                  e.target.value
-                )
+                setField("cohorte_id", e.target.value)
               }
               disabled={loadingCohortes}
               className={
-                errors.cohorte_id
-                  ? "border-semaforo-rojo"
-                  : ""
+                errors.cohorte_id ? "border-semaforo-rojo" : ""
               }
             >
               <option value="">
-                {loadingCohortes
-                  ? "Cargando…"
-                  : "Seleccioná…"}
+                {loadingCohortes ? "Cargando…" : "Seleccioná…"}
               </option>
+              {cohortes?.map((cohorte) => (
+                <option key={cohorte.id} value={cohorte.id}>
+                  {cohorte.nombre}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
 
-              {cohortes?.map((c) => (
-                <option
-                  key={c.id}
-                  value={c.id}
-                >
-                  {c.nombre}
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field
+            label="Carrera"
+            required
+            error={errors.carrera_elegida}
+          >
+            <select
+              value={form.carrera_elegida}
+              onChange={(e) =>
+                setField("carrera_elegida", e.target.value)
+              }
+            >
+              <option value="">Seleccioná…</option>
+              {CARRERAS_POSGRADO.map((carrera) => (
+                <option key={carrera.value} value={carrera.value}>
+                  {carrera.label}
                 </option>
               ))}
             </select>
           </Field>
 
+          <Field
+            label="Cómo conoció el posgrado"
+            required
+            error={errors.como_conocio}
+          >
+            <select
+              value={form.como_conocio}
+              onChange={(e) =>
+                setField("como_conocio", e.target.value)
+              }
+            >
+              <option value="">Seleccioná…</option>
+              {CANALES_DIFUSION.map((canal) => (
+                <option key={canal.value} value={canal.value}>
+                  {canal.label}
+                </option>
+              ))}
+            </select>
+          </Field>
         </div>
 
         <div className="mt-4">
@@ -733,79 +642,61 @@ export function FormularioInscripcion({
             <textarea
               value={form.motivacion}
               rows={4}
-              placeholder="Contanos por qué querés cursar esta carrera…"
+              maxLength={500}
+              placeholder="Indicá la motivación del aspirante para cursar esta carrera…"
               onChange={(e) =>
-                setField(
-                  "motivacion",
-                  e.target.value
-                )
+                setField("motivacion", e.target.value)
               }
               className={`w-full resize-none ${
-                errors.motivacion
-                  ? "border-semaforo-rojo"
-                  : ""
+                errors.motivacion ? "border-semaforo-rojo" : ""
               }`}
             />
           </Field>
         </div>
-
       </fieldset>
-
-      {/* ─────────────────────────────────────
-          PASO 3 — BECA
-      ────────────────────────────────────── */}
 
       <div>
         <SeccionBeca
+          disabled={isPending}
           value={form.beca}
           onChange={(beca) => {
-            setForm((f) => ({
-              ...f,
+            setForm((anterior) => ({
+              ...anterior,
               beca,
             }));
 
-            setErrors((e) => ({
-              ...e,
+            setErrors((anteriores) => ({
+              ...anteriores,
               tipo_beca: undefined,
               archivo_beca: undefined,
             }));
           }}
           error={{
-            tipo_beca:
-              errors.tipo_beca,
-            archivo_beca:
-              errors.archivo_beca,
+            tipo_beca: errors.tipo_beca,
+            archivo_beca: errors.archivo_beca,
           }}
         />
       </div>
 
-      {/* ─────────────────────────────────────
-          FOOTER / SUBMIT
-      ────────────────────────────────────── */}
-
       <div className="flex flex-col gap-4 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
-
         <div className="flex items-start gap-2 text-xs text-ink-muted">
           <CheckCircle2
             size={15}
             className="mt-0.5 shrink-0 text-brand-500"
           />
-
-          <p>
-            Revisá los datos antes de enviar la
-            inscripción.
-          </p>
+          <p>Revisá los datos antes de enviar la inscripción.</p>
         </div>
 
         <Button
           type="submit"
           variant="primary"
-          icon={
-            isPending
-              ? undefined
-              : Send
+          icon={isPending ? undefined : Send}
+          disabled={
+            isPending ||
+            loadingCohortes ||
+            errorCohortes ||
+            !cohortes?.length
           }
-          disabled={isPending}
         >
           {isPending ? (
             <span className="flex items-center gap-2">
@@ -816,16 +707,10 @@ export function FormularioInscripcion({
             "Enviar inscripción"
           )}
         </Button>
-
       </div>
-
     </form>
   );
 }
-
-// ─────────────────────────────────────────────
-// Wrapper de campo
-// ─────────────────────────────────────────────
 
 function Field({
   label,
@@ -840,14 +725,10 @@ function Field({
 }) {
   return (
     <div className="space-y-1.5">
-
       <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted">
         {label}
-
         {required && (
-          <span className="ml-1 text-semaforo-rojo">
-            *
-          </span>
+          <span className="ml-1 text-semaforo-rojo">*</span>
         )}
       </label>
 
@@ -855,15 +736,10 @@ function Field({
 
       {error && (
         <div className="flex items-start gap-1.5 text-xs text-semaforo-rojo">
-          <AlertCircle
-            size={13}
-            className="mt-0.5 shrink-0"
-          />
-
+          <AlertCircle size={13} className="mt-0.5 shrink-0" />
           <p>{error}</p>
         </div>
       )}
-
     </div>
   );
 }
