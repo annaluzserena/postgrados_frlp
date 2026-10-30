@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { AlertTriangle, CheckCircle, Clock, Download, Flame, RefreshCw } from "lucide-react";
 import { Button } from "@/shared/components/Button";
 import { Spinner } from "@/shared/components/Spinner";
-import type { EstudianteRiesgo, EstadoSemaforo } from "../hooks/useEstudiantesEnRiesgo";
+import type { EstudianteRiesgo} from "../hooks/useEstudiantesEnRiesgo";
 import type { LogCambioSemaforo } from "../types/semaforo.types";
 
 /**

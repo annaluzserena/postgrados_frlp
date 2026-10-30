@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Link as LinkIcon, ArrowLeft } from "lucide-react";
+import { Search, Link as LinkIcon} from "lucide-react";
 import { useSeminarios } from "../hooks/useSeminarios";
 import { Button } from "@/shared/components/Button";
 import { Spinner } from "@/shared/components/Spinner";
@@ -15,7 +15,7 @@ function ListaSeminarios() {
   const [nombre, setNombre] = useState<string>("");
   const [docente, setDocente] = useState<string>("");
   const [es_obligatorio, setEsObligatorio] = useState<boolean | undefined>(undefined);
-  const [horas_catedra, setHorasCatedra] = useState<string>("");
+  const [horas_catedra] = useState<string>("");
   const [page, setPage] = useState(1);
 
   const [linksGenerados, setLinksGenerados] = useState<Record<string, { link: string; expira: string }>>({});
@@ -196,7 +196,7 @@ function ListaSeminarios() {
                       {sem.es_obligatorio ? "Obligatorio" : "Optativo"}
                     </td>
                     <td className="px-4 py-3 text-ink-secondary">
-                      {sem.horas_catedra ?? sem.horasCatedra ?? "—"} hs
+                      {sem.horas_catedra ?? "—"} hs
                     </td>
                     <td className="px-4 py-3 text-ink-secondary">
                       <input 
@@ -219,7 +219,6 @@ function ListaSeminarios() {
                               />
                               <Button
                                 variant="outline"
-                                size="sm"
                                 onClick={() => {
                                   navigator.clipboard.writeText(`${window.location.origin}${linksGenerados[sem.id].link}`);
                                 }}
