@@ -1,7 +1,7 @@
 import { useEffect, useState, type ChangeEvent, type FocusEvent, type FormEvent } from "react";
 import { Button } from "@/shared/components/Button";
 import type { DatosPersonales, TipoBeca } from "../../shared/types/types.ts";
-import type { DraftPayload } from "../pages/InscripcionWizard.tsx";
+import type { DraftPayload } from "@/shared/types/types";
 
 interface DatosPersonalesFormProps {
   initialData: DatosPersonales;

@@ -1,5 +1,3 @@
-// Items del menú lateral según roles de usuario
-
 import {
   LayoutDashboard,
   UserPlus,
@@ -10,6 +8,7 @@ import {
   FileText,
   Newspaper,
   BookOpen,
+  Bell,
 } from "lucide-react";
 import type { MenuItem } from "@/shared/types/types";
 
@@ -29,8 +28,8 @@ export const menuItems: MenuItem[] = [
   },
   {
     id: "inscripcion",
-    label: "Inscripción",
-    href: "/inscripcion",
+    label: "Inscribir aspirante",
+    href: "/inscriptos/nuevo",
     icon: UserPlus,
     roles: ["coordinador", "admin"],
   },
@@ -60,7 +59,7 @@ export const menuItems: MenuItem[] = [
     label: "Próximas Clases",
     href: "/proximas-clases",
     icon: CalendarDays,
-    roles: ["coordinador", "admin"]
+    roles: ["coordinador", "admin"],
   },
   {
     id: "mesa-examen",
@@ -68,6 +67,12 @@ export const menuItems: MenuItem[] = [
     href: "/mesa-examen",
     icon: FileText,
     roles: ["coordinador", "admin"],
+  },
+  {
+    id: "notificaciones",
+    label: "Notificaciones",
+    href: "/notificaciones",
+    icon: Bell,
   },
   {
     id: "noticias",

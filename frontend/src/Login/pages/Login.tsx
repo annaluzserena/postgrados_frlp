@@ -1,13 +1,13 @@
-import { useState, type SyntheticEvent } from "react";
-import { Link } from "react-router-dom";
-import { User, Lock, Mail } from "lucide-react";
-import Header from "../components/Header";
-import Input from "../components/Input";
-import Checkbox from "../components/Checkbox";
-import { Button } from "../../shared/components/Button";
-import VentanaEmergente from "../../shared/components/VentanaEmergente";
-import LogoFenix from "../../assets/LogoFenix.png";
-import UtnLogo from "../../assets/UtnLogo.png";
+import { useState, type SyntheticEvent } from 'react';
+import { Link } from 'react-router-dom';
+import { User, Lock, Mail } from 'lucide-react';
+import Header from '../components/Header';
+import Input from '../components/Input';
+import Checkbox from '../components/Checkbox';
+import {Button} from '../../shared/components/Button';
+import VentanaEmergente from '../../shared/components/VentanaEmergente';
+import LogoFenix from '../../assets/LogoFenix.png';
+import UtnLogo from '../../assets/UtnLogo.png';
 
 export default function LoginScreen() {
   const [usuario, setUsuario] = useState("");

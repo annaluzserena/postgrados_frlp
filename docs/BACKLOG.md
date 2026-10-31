@@ -32,7 +32,7 @@ Este documento define las historias de usuario base del proyecto. Cada equipo de
 
 **Criterios de aceptación:**
 - [x] Al marcar "Solicito beca", aparecen opciones: 30% / 100%
-- [ ] El campo para adjuntar formulario de beca (PDF) se vuelve obligatorio
+- [x] El campo para adjuntar formulario de beca (PDF) se vuelve obligatorio
 - [x] El tipo de beca solicitada es visible para el coordinador en el dashboard
 
 **Estimación:** 2 pts | **Prioridad:** Must | **Sprint:** 1
@@ -63,7 +63,7 @@ Este documento define las historias de usuario base del proyecto. Cada equipo de
 
 **Criterios de aceptación:**
 - [x] El sistema muestra el estado de cada documento requerido (Cargado ✓ / Pendiente ✗)
-- [ ] No permite "Enviar a revisión" si falta algún documento obligatorio
+- [x] No permite "Enviar a revisión" si falta algún documento obligatorio
 - [x] Resalta en rojo los documentos faltantes con nombre descriptivo
 
 **Estimación:** 2 pts | **Prioridad:** Must | **Sprint:** 1
@@ -286,8 +286,8 @@ Este documento define las historias de usuario base del proyecto. Cada equipo de
 **para** no necesitar revisar el dashboard a diario.
 
 **Criterios de aceptación:**
-- [ ] Email automático al coordinador cuando un estudiante cambia a ROJO
-- [ ] El email incluye: nombre del estudiante, motivo del cambio, días restantes antes del vencimiento
+- [x] Email automático al coordinador cuando un estudiante cambia a ROJO
+- [x] El email incluye: nombre del estudiante, motivo del cambio, días restantes antes del vencimiento
 
 **Estimación:** 3 pts | **Prioridad:** Should | **Sprint:** 4
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Bar,
   BarChart,
@@ -24,16 +25,18 @@ const TARJETAS: {
   key: "total_inscriptos" | "activos" | "graduados" | "en_riesgo" | "dados_de_baja";
   label: string;
   claseColor: string;
+  esClickable?: boolean;
 }[] = [
   { key: "total_inscriptos", label: "Total inscriptos", claseColor: "text-brand-700 dark:text-brand-300" },
   { key: "activos", label: "Activos", claseColor: "text-semaforo-verde" },
   { key: "graduados", label: "Graduados", claseColor: "text-brand-700 dark:text-brand-300" },
-  { key: "en_riesgo", label: "En riesgo", claseColor: "text-semaforo-rojo" },
+  { key: "en_riesgo", label: "En riesgo", claseColor: "text-semaforo-rojo font-extrabold", esClickable: true },
   { key: "dados_de_baja", label: "Dados de baja", claseColor: "text-ink-muted" },
 ];
  
 export function Estadisticas() {
   const [tipoCarrera, setTipoCarrera] = useState<TipoCarrera | "">("");
+  const navigate = useNavigate();
  
   const { data: estadisticas, isLoading, isError, error } = useEstadisticasCohortes(
     tipoCarrera || undefined
@@ -84,9 +87,25 @@ export function Estadisticas() {
                 </h2>
                 <div className="grid grid-cols-5 gap-3">
                   {TARJETAS.map((t) => (
-                    <div key={t.key} className="rounded-xl border border-line bg-paper-surface p-4">
+                    <div
+                      key={t.key}
+                      onClick={() => {
+                        if (t.esClickable) {
+                          navigate("/riesgo");
+                        }
+                      }}
+                      className={`rounded-xl border border-line bg-paper-surface p-4 transition-all ${
+                        t.esClickable
+                          ? "cursor-pointer border-semaforo-rojo/40 hover:border-semaforo-rojo hover:bg-semaforo-rojo-soft/20 hover:shadow-md"
+                          : ""
+                      }`}
+                      title={t.esClickable ? "Hacé clic para ir al detalle de estudiantes en riesgo" : undefined}
+                    >
                       <p className={`text-2xl font-bold ${t.claseColor}`}>{estadisticas[0][t.key]}</p>
-                      <p className="text-xs text-ink-secondary">{t.label}</p>
+                      <p className="text-xs text-ink-secondary">
+                        {t.label}
+                        {t.esClickable && <span className="ml-1 text-[10px] font-semibold text-semaforo-rojo">➔</span>}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -104,11 +123,24 @@ export function Estadisticas() {
                       <XAxis dataKey="cohorte_nombre" tick={{ fontSize: 12 }} />
                       <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                       <Tooltip />
-                      <Legend />
+                      <Legend
+                        onClick={(e) => {
+                          if (e && (e.dataKey === "en_riesgo" || e.value === "En riesgo")) {
+                            navigate("/riesgo");
+                          }
+                        }}
+                        wrapperStyle={{ cursor: "pointer" }}
+                      />
                       <Bar dataKey="total_inscriptos" name="Inscriptos" fill="#2f62e0" />
                       <Bar dataKey="activos" name="Activos" fill="#16a34a" />
                       <Bar dataKey="graduados" name="Graduados" fill="#1b3b8f" />
-                      <Bar dataKey="en_riesgo" name="En riesgo" fill="#dc2626" />
+                      <Bar
+                        dataKey="en_riesgo"
+                        name="En riesgo"
+                        fill="#dc2626"
+                        cursor="pointer"
+                        onClick={() => navigate("/riesgo")}
+                      />
                       <Bar dataKey="dados_de_baja" name="Dados de baja" fill="#94a3b8" />
                     </BarChart>
                   </ResponsiveContainer>

@@ -378,3 +378,9 @@ export interface EstadisticasCohorte {
   en_riesgo: number;
   dados_de_baja: number;
 }
+export interface DraftPayload {
+  datosPersonales: DatosPersonales;
+  datosAcademicos: DatosAcademicos;
+  datosDocumentos: DatosDocumentos;
+  savedAt: string;
+}
