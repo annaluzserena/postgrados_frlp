@@ -256,10 +256,10 @@ Este documento define las historias de usuario base del proyecto. Cada equipo de
 **para** poder intervenir antes de que sea demasiado tarde.
 
 **Criterios de aceptación:**
-- [ ] El semáforo se recalcula automáticamente cada día (tarea programada)
-- [ ] Reglas según tipo de carrera definidas en SRS RF-GRAD-002
-- [ ] El VERDE solo puede asignarse manualmente (BR-008)
-- [ ] Los cambios de estado se loggean con timestamp
+- [x] El semáforo se recalcula automáticamente cada día (tarea programada)
+- [x] Reglas según tipo de carrera definidas en SRS RF-GRAD-002
+- [x] El VERDE solo puede asignarse manualmente (BR-008)
+- [x] Los cambios de estado se loggean con timestamp
 
 **Estimación:** 8 pts | **Prioridad:** Must | **Sprint:** 3
 
